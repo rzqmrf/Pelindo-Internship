@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120" width="420" height="120">
+  <g transform="translate(10, 10)">
+    <!-- Pelindo Icon Symbol -->
+    <path d="M 0 35 C 0 15, 16 0, 35 0 C 50 0, 60 10, 60 25 L 60 40 L 38 40 L 38 25 C 38 18, 30 14, 22 20 C 17 24, 15 30, 15 35 L 15 75 L 0 75 Z" fill="#38BDF8"/>
+    <path d="M 22 35 C 22 15, 38 0, 58 0 L 75 0 C 95 0, 110 15, 110 35 C 110 55, 95 70, 75 70 L 45 70 L 45 52 L 72 52 C 82 52, 92 45, 92 35 C 92 25, 82 18, 72 18 L 58 18 C 46 18, 38 25, 38 35 L 38 60 L 22 60 Z" fill="#0072CE"/>
+    <rect x="0" y="60" width="22" height="22" fill="#38BDF8"/>
+
+    <!-- PELINDO Text -->
+    <text x="135" y="55" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="900" font-size="52" fill="#0072CE" letter-spacing="-1">PELINDO</text>
+    
+    <!-- SOLUSI DIGITAL Subtext -->
+    <text x="138" y="85" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-size="18" fill="#EF4444" letter-spacing="7">SOLUSI DIGITAL</text>
+  </g>
+</svg>
