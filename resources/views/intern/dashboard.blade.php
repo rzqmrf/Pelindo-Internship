@@ -64,39 +64,79 @@
         </div>
     </div>
 
-    <!-- Daily Log Status Alert Banner -->
-    @if(!$todayActivity)
-        <div class="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 text-amber-900 shadow-xs flex items-center justify-between">
+    <!-- Certificate Ready Banner (if published) -->
+    @if($certificate)
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
             <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
-                    <i class="fa-solid fa-exclamation"></i>
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur text-white flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-award"></i>
                 </div>
                 <div>
-                    <h3 class="font-extrabold text-xs">Aktivitas Hari Ini Belum Diisi</h3>
-                    <p class="text-[11px] text-amber-700">Segera catat rincian pengerjaan tugas harian Anda hari ini.</p>
+                    <h3 class="font-extrabold text-xs">E-Sertifikat Resmi Magang Telah Terbit!</h3>
+                    <p class="text-[11px] text-blue-100">No: {{ $certificate->certificate_number }} &bull; Predikat telah disahkan oleh HR Pelindo.</p>
                 </div>
             </div>
-            <a href="{{ route('intern.activities.create') }}" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-xs">
-                Isi Sekarang
-            </a>
-        </div>
-    @else
-        <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-4 text-emerald-900 shadow-xs flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
-                    <i class="fa-solid fa-check"></i>
-                </div>
-                <div>
-                    <h3 class="font-extrabold text-xs">Aktivitas Hari Ini Telah Terisi</h3>
-                    <p class="text-[11px] text-emerald-700">Status: <strong class="uppercase text-emerald-800">{{ $todayActivity->status }}</strong> (Status Kerja: {{ $todayActivity->work_location }})</p>
-                </div>
-            </div>
-            <a href="{{ route('intern.activities.index') }}" class="px-4 py-2 bg-white text-emerald-700 border border-emerald-200 font-extrabold rounded-xl text-xs hover:bg-emerald-50 transition shadow-xs flex items-center space-x-1.5">
-                <span>Lihat Detail</span>
-                <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            <a href="{{ route('intern.certificate.index') }}" class="px-4 py-2 bg-white text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-50 transition shadow-sm">
+                Lihat & Unduh
             </a>
         </div>
     @endif
+
+    <!-- Attendance & Daily Log Dual Status Banners -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Attendance Quick Card -->
+        <div class="p-4 rounded-2xl border {{ $todayAttendance ? 'bg-emerald-50/80 border-emerald-200/80 text-emerald-900' : 'bg-blue-50/80 border-blue-200/80 text-blue-900' }} shadow-xs flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full {{ $todayAttendance ? 'bg-emerald-500' : 'bg-blue-500' }} text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                    <i class="fa-solid {{ $todayAttendance ? 'fa-fingerprint' : 'fa-location-dot' }}"></i>
+                </div>
+                <div>
+                    <h3 class="font-extrabold text-xs">
+                        {{ $todayAttendance ? 'Presensi: ' . ($todayAttendance->check_in_time ? 'Masuk ' . substr($todayAttendance->check_in_time, 0, 5) : 'Hadir') : 'Presensi Hari Ini' }}
+                    </h3>
+                    <p class="text-[11px] {{ $todayAttendance ? 'text-emerald-700' : 'text-blue-700' }}">
+                        {{ $todayAttendance ? 'Mode Kerja: ' . $todayAttendance->work_location : 'Belum melakukan Check-in kehadiran hari ini.' }}
+                    </p>
+                </div>
+            </div>
+            <a href="{{ route('intern.attendance.index') }}" class="px-3.5 py-1.5 {{ $todayAttendance ? 'bg-white text-emerald-700 border border-emerald-200' : 'bg-blue-600 text-white' }} font-bold rounded-xl text-xs transition shadow-xs">
+                {{ $todayAttendance ? 'Detail' : 'Check-In' }}
+            </a>
+        </div>
+
+        <!-- Logbook Card -->
+        @if(!$todayActivity)
+            <div class="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 text-amber-900 shadow-xs flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                        <i class="fa-solid fa-exclamation"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-xs">Logbook Hari Ini Belum Diisi</h3>
+                        <p class="text-[11px] text-amber-700">Segera catat rincian pengerjaan tugas.</p>
+                    </div>
+                </div>
+                <a href="{{ route('intern.activities.create') }}" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-xs">
+                    Isi Sekarang
+                </a>
+            </div>
+        @else
+            <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-4 text-emerald-900 shadow-xs flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-xs">Logbook Hari Ini Terisi</h3>
+                        <p class="text-[11px] text-emerald-700">Status: <strong class="uppercase text-emerald-800">{{ $todayActivity->status }}</strong></p>
+                    </div>
+                </div>
+                <a href="{{ route('intern.activities.index') }}" class="px-3.5 py-1.5 bg-white text-emerald-700 border border-emerald-200 font-extrabold rounded-xl text-xs hover:bg-emerald-50 transition shadow-xs">
+                    Detail
+                </a>
+            </div>
+        @endif
+    </div>
 
     <!-- 4 Metric Cards Matching Screenshot -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

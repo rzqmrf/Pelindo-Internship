@@ -196,19 +196,27 @@
     <!-- Signature Section -->
     <table style="width: 100%; border-collapse: collapse; margin-top: 40px; font-family: Arial, sans-serif; font-size: 11px; page-break-inside: avoid;">
         <tr>
-            <td style="width: 50%;"></td>
-            <td style="width: 50%; text-align: center; padding-bottom: 15px;">
+            <td style="width: 33.3%;"></td>
+            <td style="width: 33.3%;"></td>
+            <td style="width: 33.3%; text-align: center; padding-bottom: 15px;">
                 Surabaya, {{ $generatedDate }}
             </td>
         </tr>
         <tr>
-            <td style="text-align: center; vertical-align: top; width: 50%;">
-                <div style="font-weight: bold; margin-bottom: 75px;">Peserta Magang</div>
-                <div style="font-weight: bold;">{{ $internUser->name }}</div>
+            <td style="text-align: center; vertical-align: top; width: 33.3%;">
+                <div style="font-weight: bold; margin-bottom: 60px;">Peserta Magang</div>
+                <div style="font-weight: bold; text-decoration: underline;">{{ $internUser->name }}</div>
+                <div style="color: #4b5563; font-size: 9px; margin-top: 2px;">NIM/NIS. {{ $internProfile?->student_id_number ?? '-' }}</div>
             </td>
-            <td style="text-align: center; vertical-align: top; width: 50%;">
-                <div style="font-weight: bold; margin-bottom: 75px;">Manajer Divisi</div>
-                <div style="font-weight: bold;">{{ $internProfile?->division?->head_name ?? 'Mohammad Nasrul Rohman' }}</div>
+            <td style="text-align: center; vertical-align: top; width: 33.3%;">
+                <div style="font-weight: bold; margin-bottom: 60px;">Pembimbing Lapangan</div>
+                <div style="font-weight: bold; text-decoration: underline;">{{ $internProfile?->supervisor?->name ?? '-' }}</div>
+                <div style="color: #4b5563; font-size: 9px; margin-top: 2px;">NIP. {{ $internProfile?->supervisor?->supervisorProfile?->employee_id_number ?? '-' }}</div>
+            </td>
+            <td style="text-align: center; vertical-align: top; width: 33.3%;">
+                <div style="font-weight: bold; margin-bottom: 60px;">Manajer Divisi</div>
+                <div style="font-weight: bold; text-decoration: underline;">{{ $internProfile?->division?->head_name ?? 'Mohammad Nasrul Rohman' }}</div>
+                <div style="color: #4b5563; font-size: 9px; margin-top: 2px;">{{ $internProfile?->division?->code ?? 'ILCS-SUB' }}</div>
             </td>
         </tr>
     </table>

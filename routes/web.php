@@ -12,11 +12,17 @@ use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AllowanceClaimController;
+use App\Http\Controllers\AssessmentController;
+use App\Http\Controllers\AttendanceController;
 
 // Redirect Root to Login or Dashboard
 Route::get('/', function () {
     return redirect()->route('login');
 });
+
+// Public Certificate Verification & Download
+Route::get('/verify-certificate/{token}', [AssessmentController::class, 'publicVerify'])->name('certificate.verify');
+Route::get('/certificate/download/{token}', [AssessmentController::class, 'downloadPdf'])->name('certificate.download');
 
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -60,9 +66,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/divisions/{id}', [DivisionController::class, 'update'])->name('divisions.update');
         Route::delete('/divisions/{id}', [DivisionController::class, 'destroy'])->name('divisions.destroy');
 
-        // Global Monitoring
+        // Global Monitoring & Attendance
         Route::get('/monitoring', [AdminController::class, 'monitoring'])->name('monitoring');
         Route::get('/monitoring/export-rekap', [AdminController::class, 'exportDivisionRekap'])->name('monitoring.export_rekap');
+        Route::get('/attendance', [AttendanceController::class, 'adminIndex'])->name('attendance.index');
 
         // Manage Announcements
         Route::get('/announcements', [AnnouncementController::class, 'index'])->name('announcements.index');
@@ -72,6 +79,10 @@ Route::middleware(['auth'])->group(function () {
         // Allowance Claims
         Route::get('/allowance', [AllowanceClaimController::class, 'hrIndex'])->name('allowance.index');
         Route::post('/allowance/{id}/process', [AllowanceClaimController::class, 'hrProcess'])->name('allowance.process');
+
+        // Manage Assessments & Certificates
+        Route::get('/assessments', [AssessmentController::class, 'adminIndex'])->name('assessments.index');
+        Route::post('/assessments/{id}/publish', [AssessmentController::class, 'publishCertificate'])->name('assessments.publish');
     });
 
     // 2. Supervisor Routes
@@ -81,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/activities', [SupervisorController::class, 'activities'])->name('activities');
         Route::post('/activities/{id}/approve', [SupervisorController::class, 'approve'])->name('activities.approve');
         Route::get('/statistics', [SupervisorController::class, 'statistics'])->name('statistics');
+        Route::get('/attendance', [AttendanceController::class, 'supervisorIndex'])->name('attendance.index');
         
         // Leave request approvals
         Route::get('/leaves', [LeaveRequestController::class, 'supervisorIndex'])->name('leaves.index');
@@ -91,6 +103,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/allowance', [AllowanceClaimController::class, 'supervisorIndex'])->name('allowance.index');
         Route::post('/allowance/{id}/approve', [AllowanceClaimController::class, 'supervisorApprove'])->name('allowance.approve');
         Route::post('/allowance/{id}/reject', [AllowanceClaimController::class, 'supervisorReject'])->name('allowance.reject');
+
+        // Assessments & Evaluation
+        Route::get('/assessments', [AssessmentController::class, 'supervisorIndex'])->name('assessments.index');
+        Route::get('/assessments/{intern_id}/evaluate', [AssessmentController::class, 'evaluate'])->name('assessments.evaluate');
+        Route::post('/assessments/{intern_id}', [AssessmentController::class, 'storeOrUpdate'])->name('assessments.store');
     });
 
     // 3. Intern Routes
@@ -102,6 +119,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/activities/{id}/edit', [InternActivityController::class, 'edit'])->name('activities.edit');
         Route::put('/activities/{id}', [InternActivityController::class, 'update'])->name('activities.update');
 
+        // Attendance & Geofencing
+        Route::get('/attendance', [AttendanceController::class, 'internIndex'])->name('attendance.index');
+        Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn'])->name('attendance.checkin');
+        Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut'])->name('attendance.checkout');
+
         // Leave request submissions
         Route::get('/leaves', [LeaveRequestController::class, 'index'])->name('leaves.index');
         Route::post('/leaves', [LeaveRequestController::class, 'store'])->name('leaves.store');
@@ -110,6 +132,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/allowance', [AllowanceClaimController::class, 'index'])->name('allowance.index');
         Route::get('/allowance/calculate', [AllowanceClaimController::class, 'calculate'])->name('allowance.calculate');
         Route::post('/allowance', [AllowanceClaimController::class, 'store'])->name('allowance.store');
+
+        // Certificate & Transcripts
+        Route::get('/certificate', [AssessmentController::class, 'internView'])->name('certificate.index');
     });
 
     // Notification Routes

@@ -87,39 +87,49 @@
                 @if(Auth::user()->isAdmin())
                     <p class="px-3 text-[10px] font-black tracking-widest uppercase text-slate-400 mb-2 mt-2">MENU UTAMA</p>
                     
-                    <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.dashboard') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.dashboard') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-house text-sm w-5"></i>
                         <span>Dashboard</span>
                     </a>
 
-                    <a href="{{ route('admin.interns.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.interns*') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.interns.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.interns*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-user-graduate text-sm w-5"></i>
                         <span>Peserta Magang</span>
                     </a>
 
-                    <a href="{{ route('admin.supervisors.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.supervisors*') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.supervisors.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.supervisors*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-user-tie text-sm w-5"></i>
                         <span>Pembimbing</span>
                     </a>
 
-                    <a href="{{ route('admin.divisions.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.divisions*') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.divisions.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.divisions*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-sitemap text-sm w-5"></i>
                         <span>Kelola Divisi</span>
                     </a>
 
-                    <a href="{{ route('admin.monitoring') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.monitoring*') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.attendance.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.attendance*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-clipboard-user text-sm w-5"></i>
+                        <span>Rekap Presensi</span>
+                    </a>
+
+                    <a href="{{ route('admin.monitoring') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.monitoring*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-eye text-sm w-5"></i>
                         <span>Monitoring Logbook</span>
                     </a>
 
-                    <a href="{{ route('admin.announcements.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.announcements*') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.announcements.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.announcements*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-bullhorn text-sm w-5"></i>
                         <span>Pengumuman HR</span>
                     </a>
 
-                    <a href="{{ route('admin.allowance.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.allowance*') ? 'bg-[#3B82F6]/10 text-blue-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                    <a href="{{ route('admin.allowance.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.allowance*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-coins text-sm w-5"></i>
                         <span>Klaim Uang Saku</span>
+                    </a>
+
+                    <a href="{{ route('admin.assessments.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('admin.assessments*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-award text-sm w-5"></i>
+                        <span>Kelola E-Sertifikat</span>
                     </a>
                 @endif
 
@@ -134,6 +144,11 @@
                     <a href="{{ route('supervisor.interns') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('supervisor.interns*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-users text-sm w-5"></i>
                         <span>Peserta Bimbingan</span>
+                    </a>
+
+                    <a href="{{ route('supervisor.attendance.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('supervisor.attendance*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-calendar-check text-sm w-5"></i>
+                        <span>Monitoring Presensi</span>
                     </a>
 
                     <a href="{{ route('supervisor.activities') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('supervisor.activities*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -155,6 +170,11 @@
                         <i class="fa-solid fa-file-invoice-dollar text-sm w-5"></i>
                         <span>Approval Uang Saku</span>
                     </a>
+
+                    <a href="{{ route('supervisor.assessments.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('supervisor.assessments*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-graduation-cap text-sm w-5"></i>
+                        <span>Penilaian & Nilai Akhir</span>
+                    </a>
                 @endif
 
                 @if(Auth::user()->isIntern())
@@ -163,6 +183,11 @@
                     <a href="{{ route('intern.dashboard') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.dashboard') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-house text-sm w-5"></i>
                         <span>Dashboard</span>
+                    </a>
+
+                    <a href="{{ route('intern.attendance.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.attendance*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-location-dot text-sm w-5"></i>
+                        <span>Presensi & Geofencing</span>
                     </a>
 
                     <a href="{{ route('intern.activities.create') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.activities.create') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
@@ -183,6 +208,11 @@
                     <a href="{{ route('intern.allowance.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.allowance*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-coins text-sm w-5"></i>
                         <span>Klaim Uang Saku</span>
+                    </a>
+
+                    <a href="{{ route('intern.certificate.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.certificate*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-certificate text-sm w-5"></i>
+                        <span>E-Sertifikat & Nilai</span>
                     </a>
                 @endif
 

@@ -223,6 +223,30 @@ class DatabaseSeeder extends Seeder
 
         // 5. Seed Daily Activities
         $today = Carbon::today();
+
+        // Seed activities for Intern 1 in Period 1 (July 1 to July 28, 2026) to make it claimable!
+        $periodStart = Carbon::now()->subMonths(1)->startOfMonth();
+        $seededWeekdays = 0;
+        $seedDate = $periodStart->copy();
+        
+        while ($seededWeekdays < 20) {
+            if (!$seedDate->isWeekend()) {
+                DailyActivity::create([
+                    'intern_id' => $intern1->id,
+                    'supervisor_id' => $spv1->id,
+                    'date' => $seedDate->format('Y-m-d'),
+                    'work_location' => $seededWeekdays % 5 === 0 ? 'WFH' : 'WFO',
+                    'activity_description' => 'Melakukan pengembangan modul internal dan sinkronisasi data logbook magang ke server Pelindo untuk tanggal ' . $seedDate->format('Y-m-d') . '.',
+                    'notes' => 'Pekerjaan berjalan lancar dan selesai sesuai target.',
+                    'status' => 'approved',
+                    'supervisor_note' => 'Disetujui. Lanjutkan progresnya.',
+                    'reviewed_at' => $seedDate->copy()->addHours(8),
+                ]);
+                $seededWeekdays++;
+            }
+            $seedDate->addDay();
+        }
+
         $sampleActivities = [
             [
                 'offset' => 0,

@@ -12,8 +12,10 @@
     wfoCount: 0,
     wfhCount: 0,
     leaveCount: 0,
-    wfoRate: '',
-    wfhRate: '',
+    wfoRate: 0,
+    wfhRate: 0,
+    wfoRateFormatted: '',
+    wfhRateFormatted: '',
     totalAllowance: 0,
     totalAllowanceFormatted: '',
     calculate() {
@@ -31,8 +33,10 @@
                 this.wfoCount = data.wfo_count;
                 this.wfhCount = data.wfh_count;
                 this.leaveCount = data.leave_count;
-                this.wfoRate = data.wfo_rate_formatted;
-                this.wfhRate = data.wfh_rate_formatted;
+                this.wfoRate = data.wfo_rate;
+                this.wfhRate = data.wfh_rate;
+                this.wfoRateFormatted = data.wfo_rate_formatted;
+                this.wfhRateFormatted = data.wfh_rate_formatted;
                 this.totalAllowance = data.total_allowance;
                 this.totalAllowanceFormatted = data.total_allowance_formatted;
                 this.calculated = true;
@@ -163,12 +167,12 @@
                             <h4 class="font-extrabold text-blue-800 text-[10px] uppercase tracking-wider">Perhitungan Uang Saku</h4>
                             <div class="space-y-1.5 text-[11px] leading-relaxed text-slate-650">
                                 <div class="flex justify-between">
-                                    <span>Hadir WFO (<span x-text="wfoCount"></span> hari &times; <span x-text="wfoRate"></span>)</span>
-                                    <span class="font-bold text-slate-800" x-text="'Rp ' + (wfoCount * 100000).toLocaleString('id-ID')"></span>
+                                    <span>Hadir WFO (<span x-text="wfoCount"></span> hari &times; <span x-text="wfoRateFormatted"></span>)</span>
+                                    <span class="font-bold text-slate-800" x-text="'Rp ' + (wfoCount * wfoRate).toLocaleString('id-ID')"></span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span>Hadir WFH (<span x-text="wfhCount"></span> hari &times; <span x-text="wfhRate"></span>)</span>
-                                    <span class="font-bold text-slate-800" x-text="'Rp ' + (wfhCount * 80000).toLocaleString('id-ID')"></span>
+                                    <span>Hadir WFH (<span x-text="wfhCount"></span> hari &times; <span x-text="wfhRateFormatted"></span>)</span>
+                                    <span class="font-bold text-slate-800" x-text="'Rp ' + (wfhCount * wfhRate).toLocaleString('id-ID')"></span>
                                 </div>
                                 <div class="border-t border-blue-200/50 my-2 pt-2 flex justify-between text-xs font-black text-blue-900">
                                     <span>Total Uang Saku:</span>

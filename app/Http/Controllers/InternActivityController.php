@@ -52,8 +52,19 @@ class InternActivityController extends Controller
         // 5. Announcements (Latest 3)
         $announcements = \App\Models\Announcement::with('creator')->latest()->take(3)->get();
 
+        // 6. Today's Attendance & Certificate
+        $todayAttendance = \App\Models\Attendance::where('intern_id', $userId)
+            ->whereDate('date', $today)
+            ->first();
+
+        $certificate = \App\Models\Certificate::where('intern_id', $userId)
+            ->where('status', 'published')
+            ->first();
+
         return view('intern.dashboard', compact(
             'todayActivity',
+            'todayAttendance',
+            'certificate',
             'totalSubmitted',
             'pendingApprovalCount',
             'approvedCount',
@@ -101,10 +112,12 @@ class InternActivityController extends Controller
         $userId = Auth::id();
         $internProfile = InternProfile::where('user_id', $userId)->first();
 
+        $isSubmit = $request->action === 'submit';
+
         $request->validate([
             'date' => 'required|date',
             'work_location' => 'required|in:WFO,WFH,Leave',
-            'activity_description' => 'required|string|min:10',
+            'activity_description' => $isSubmit ? 'required|string|min:10' : 'nullable|string',
             'notes' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
             'action' => 'required|in:draft,submit',
@@ -131,7 +144,7 @@ class InternActivityController extends Controller
             'supervisor_id' => $internProfile?->supervisor_id,
             'date' => $request->date,
             'work_location' => $request->work_location,
-            'activity_description' => $request->activity_description,
+            'activity_description' => $request->activity_description ?? '',
             'notes' => $request->notes,
             'attachment_path' => $attachmentPath,
             'status' => $status,
@@ -177,10 +190,12 @@ class InternActivityController extends Controller
                 ->with('error', 'Aktivitas tidak dapat diubah.');
         }
 
+        $isSubmit = $request->action === 'submit';
+
         $request->validate([
             'date' => 'required|date',
             'work_location' => 'required|in:WFO,WFH,Leave',
-            'activity_description' => 'required|string|min:10',
+            'activity_description' => $isSubmit ? 'required|string|min:10' : 'nullable|string',
             'notes' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
             'action' => 'required|in:draft,submit',
@@ -189,7 +204,7 @@ class InternActivityController extends Controller
         $data = [
             'date' => $request->date,
             'work_location' => $request->work_location,
-            'activity_description' => $request->activity_description,
+            'activity_description' => $request->activity_description ?? '',
             'notes' => $request->notes,
             'status' => $request->action === 'draft' ? 'draft' : 'pending',
         ];

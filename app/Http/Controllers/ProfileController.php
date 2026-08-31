@@ -19,11 +19,26 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+        ];
+
+        if ($user->isIntern() && $user->internProfile) {
+            $rules = array_merge($rules, [
+                'institution' => 'nullable|string|max:255',
+                'major' => 'nullable|string|max:255',
+                'student_id_number' => 'nullable|string|max:50',
+                'nik_number' => 'nullable|string|max:30',
+                'bank_name' => 'nullable|string|max:100',
+                'bank_account_number' => 'nullable|string|max:50',
+                'bank_account_holder' => 'nullable|string|max:255',
+                'address' => 'nullable|string|max:1000',
+            ]);
+        }
+
+        $request->validate($rules);
 
         $user->update([
             'name' => $request->name,
@@ -40,16 +55,6 @@ class ProfileController extends Controller
         }
 
         if ($user->isIntern() && $user->internProfile) {
-            $request->validate([
-                'institution' => 'nullable|string|max:255',
-                'major' => 'nullable|string|max:255',
-                'student_id_number' => 'nullable|string|max:50',
-                'nik_number' => 'nullable|string|max:30',
-                'bank_name' => 'nullable|string|max:100',
-                'bank_account_number' => 'nullable|string|max:50',
-                'bank_account_holder' => 'nullable|string|max:255',
-                'address' => 'nullable|string|max:1000',
-            ]);
             $user->internProfile->update([
                 'institution' => $request->institution,
                 'major' => $request->major,

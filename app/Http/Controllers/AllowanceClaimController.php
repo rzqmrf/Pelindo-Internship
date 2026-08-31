@@ -15,8 +15,8 @@ use Carbon\Carbon;
 class AllowanceClaimController extends Controller
 {
     // Rates configuration
-    private $wfoRate = 100000; // Rp 100.000 / hari
-    private $wfhRate = 80000;  // Rp 80.000 / hari
+    private $wfoRate = 71250; // Rp 71.250 / hari
+    private $wfhRate = 71250; // Rp 71.250 / hari
 
     /**
      * Helper to get all 20-weekday periods for an intern.
@@ -126,6 +126,7 @@ class AllowanceClaimController extends Controller
 
         $activities = DailyActivity::where('intern_id', $userId)
             ->whereBetween('date', [$request->start_date, $request->end_date])
+            ->whereIn('status', ['approved', 'pending', 'revision'])
             ->get();
 
         $wfoCount = $activities->where('work_location', 'WFO')->count();
@@ -138,6 +139,8 @@ class AllowanceClaimController extends Controller
             'wfo_count' => $wfoCount,
             'wfh_count' => $wfhCount,
             'leave_count' => $leaveCount,
+            'wfo_rate' => $this->wfoRate,
+            'wfh_rate' => $this->wfhRate,
             'wfo_rate_formatted' => 'Rp ' . number_format($this->wfoRate, 0, ',', '.'),
             'wfh_rate_formatted' => 'Rp ' . number_format($this->wfhRate, 0, ',', '.'),
             'total_allowance' => $totalAllowance,
@@ -186,6 +189,7 @@ class AllowanceClaimController extends Controller
         // Calculate attendance log statistics
         $activities = DailyActivity::where('intern_id', $user->id)
             ->whereBetween('date', [$startDate, $endDate])
+            ->whereIn('status', ['approved', 'pending', 'revision'])
             ->get();
 
         $wfoCount = $activities->where('work_location', 'WFO')->count();

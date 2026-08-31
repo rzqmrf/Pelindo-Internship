@@ -100,4 +100,25 @@ class User extends Authenticatable
     {
         return $this->hasMany(AllowanceClaim::class, 'supervisor_id');
     }
+
+    public function assessments()
+    {
+        return $this->hasMany(InternAssessment::class, 'intern_id');
+    }
+
+    public function supervisedAssessments()
+    {
+        return $this->hasMany(InternAssessment::class, 'supervisor_id');
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class, 'intern_id');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class, 'intern_id');
+    }
 }
+
