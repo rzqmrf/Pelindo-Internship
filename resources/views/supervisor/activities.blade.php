@@ -5,18 +5,12 @@
 @section('content')
 <div class="space-y-6" x-data="{ reviewModalOpen: false, selectedActivity: null, statusAction: 'approved', supervisorNote: '' }">
 
-    <!-- Header Card -->
-    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#0B63E5] flex items-center justify-center text-xl shrink-0">
-                <i class="fa-solid fa-clipboard-list text-sm"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-black text-slate-850 tracking-tight">Persetujuan Logbook Aktivitas Harian</h1>
-                <p class="text-xs font-semibold text-slate-400 mt-1">Periksa, setujui, minta revisi, atau tolak laporan aktivitas harian mahasiswa/siswa bimbingan Anda.</p>
-            </div>
-        </div>
-    </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Persetujuan Logbook Aktivitas Harian" 
+        subtitle="Periksa, setujui, minta revisi, atau tolak laporan aktivitas harian mahasiswa/siswa bimbingan Anda." 
+        icon="fa-solid fa-clipboard-list"
+    />
 
     <!-- 5 KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

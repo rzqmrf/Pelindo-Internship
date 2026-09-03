@@ -5,29 +5,23 @@
 @section('content')
 <div class="space-y-6" x-data="{ detailModalOpen: false, selectedActivity: null }">
 
-    <!-- Header Card matching screenshot -->
-    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold shrink-0">
-                <i class="fa-regular fa-file-lines"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-black text-slate-900 tracking-tight">Riwayat & Status Approval Aktivitas Harian</h1>
-                <p class="text-xs text-slate-500 font-medium mt-0.5">Daftar lengkap laporan harian yang telah dikirim beserta catatan dari pembimbing lapangan.</p>
-            </div>
-        </div>
-
-        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-            <a href="{{ route('intern.activities.create') }}" class="px-4 py-2.5 bg-[#005B9C] hover:bg-[#002B49] text-white font-extrabold rounded-xl text-xs transition shadow-xs flex items-center space-x-2">
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Riwayat & Status Approval Aktivitas Harian" 
+        subtitle="Daftar lengkap laporan harian yang telah dikirim beserta catatan dari pembimbing lapangan." 
+        icon="fa-regular fa-file-lines"
+    >
+        <x-slot:action>
+            <a href="{{ route('intern.activities.create') }}" class="px-4 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs transition shadow-xs flex items-center space-x-2">
                 <i class="fa-solid fa-plus text-xs"></i>
                 <span>Isi Aktivitas Hari Ini</span>
             </a>
-            <a href="{{ route('reports.index') }}" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-extrabold rounded-xl text-xs transition border border-slate-200 shadow-2xs flex items-center space-x-2">
-                <i class="fa-solid fa-file-pdf text-rose-500 text-xs"></i>
-                <span>Download PDF Laporan</span>
+            <a href="{{ route('reports.index') }}" class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-extrabold rounded-2xl text-xs transition border border-slate-200 shadow-2xs flex items-center space-x-2">
+                <i class="fa-solid fa-file-pdf text-rose-500"></i>
+                <span>Cetak Laporan PDF</span>
             </a>
-        </div>
-    </div>
+        </x-slot:action>
+    </x-page-header>
 
     <!-- Filter Bar Card matching screenshot -->
     <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs">

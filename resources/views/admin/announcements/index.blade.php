@@ -5,18 +5,12 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Header Card -->
-    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#0B63E5] flex items-center justify-center text-xl shrink-0">
-                <i class="fa-solid fa-bullhorn text-sm"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-black text-slate-850 tracking-tight">Manajemen Pengumuman HR</h1>
-                <p class="text-xs font-semibold text-slate-400 mt-1">Buat, kelola, dan sebarluaskan pengumuman atau papan informasi penting ke seluruh peserta magang dan pembimbing.</p>
-            </div>
-        </div>
-    </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Manajemen Pengumuman HR" 
+        subtitle="Buat, kelola, dan sebarluaskan pengumuman atau papan informasi penting ke seluruh peserta magang dan pembimbing." 
+        icon="fa-solid fa-bullhorn"
+    />
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         

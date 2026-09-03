@@ -5,25 +5,19 @@
 @section('content')
 <div class="space-y-6" x-data="{ hrModalOpen: false, selectedClaim: null, hrNote: '' }">
 
-    <!-- Header Card -->
-    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#0B63E5] flex items-center justify-center text-xl shrink-0">
-                <i class="fa-solid fa-money-check-dollar text-sm"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-black text-slate-850 tracking-tight">Verifikasi & Pencairan Uang Saku</h1>
-                <p class="text-xs font-semibold text-slate-400 mt-1">Kelola pencairan uang saku mahasiswa magang bulanan yang telah disetujui oleh pembimbing lapangan.</p>
-            </div>
-        </div>
-
-        <div class="flex items-center space-x-2">
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Verifikasi & Pencairan Uang Saku" 
+        subtitle="Kelola pencairan uang saku mahasiswa magang bulanan yang telah disetujui oleh pembimbing lapangan." 
+        icon="fa-solid fa-money-check-dollar"
+    >
+        <x-slot:action>
             <a href="{{ route('admin.allowance.export_payroll', request()->all()) }}" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-extrabold transition flex items-center space-x-2 shadow-2xs">
                 <i class="fa-solid fa-file-excel"></i>
                 <span>Ekspor Payroll Excel/CSV</span>
             </a>
-        </div>
-    </div>
+        </x-slot:action>
+    </x-page-header>
 
     <!-- Alert Messages -->
     @if(session('success'))

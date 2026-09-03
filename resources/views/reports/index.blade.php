@@ -47,18 +47,13 @@
     }
 }">
 
-    <!-- Top Banner Card -->
-    <div class="bg-gradient-to-r from-blue-100/90 via-indigo-50/80 to-blue-50/60 rounded-3xl p-7 border border-blue-100/80 shadow-sm relative overflow-hidden">
-        <div class="relative z-10">
-            <span class="px-3 py-1.5 bg-blue-600 text-white rounded-full text-[9px] font-extrabold uppercase tracking-wider">
-                Pelindo Report Export Center
-            </span>
-            <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-3">Cetak Laporan Magang PDF & Excel</h1>
-            <p class="text-xs text-slate-650 font-semibold max-w-xl mt-1.5 leading-relaxed">
-                Ekspor berkas laporan harian kegiatan magang berformat standar resmi PT Pelabuhan Indonesia (Persero) lengkap dengan tanda tangan verifikasi.
-            </p>
-        </div>
-    </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Cetak & Export Laporan Magang PDF / Excel" 
+        subtitle="Ekspor berkas laporan harian kegiatan magang berformat standar resmi PT Pelabuhan Indonesia (Persero) lengkap dengan tanda tangan verifikasi." 
+        icon="fa-solid fa-file-export"
+        badge="Official Report Center"
+    />
 
     <!-- Step Progress Indicator -->
     <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">

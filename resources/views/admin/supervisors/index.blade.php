@@ -19,32 +19,6 @@
         </x-slot:action>
     </x-page-header>
 
-    <!-- Search Bar -->
-    <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
-        <form method="GET" action="{{ route('admin.supervisors.index') }}" class="flex items-center gap-4">
-            <!-- Search input -->
-            <div class="relative flex-1">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                </span>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama pembimbing, email, atau NIP..."
-                       class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-850 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex items-center gap-3">
-                <button type="submit" class="px-6 py-2.5 bg-[#0B63E5] hover:bg-blue-750 text-white rounded-2xl text-xs font-extrabold transition flex items-center justify-center space-x-1.5 shadow-2xs">
-                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
-                    <span>Cari</span>
-                </button>
-                <a href="{{ route('admin.supervisors.index') }}" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-2xl text-xs font-extrabold hover:bg-slate-50 transition flex items-center justify-center space-x-1.5 shadow-2xs">
-                    <i class="fa-solid fa-rotate text-xs"></i>
-                    <span>Reset</span>
-                </a>
-            </div>
-        </form>
-    </div>
-
     <!-- 4 KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Card 1: Total Pembimbing -->
@@ -71,21 +45,21 @@
                 </p>
             </div>
             <div class="w-12 h-12 rounded-2xl bg-emerald-50/80 text-emerald-600 flex items-center justify-center text-lg shrink-0">
-                <i class="fa-solid fa-circle-check"></i>
+                <i class="fa-solid fa-check-double"></i>
             </div>
         </div>
 
-        <!-- Card 3: Rata-rata Peserta -->
+        <!-- Card 3: Rata-Rata Peserta -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rata-rata Peserta</p>
+                <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Rata-Rata Peserta</p>
                 <h3 class="text-3xl font-black text-slate-800">{{ $avgInternsPerSpv }}</h3>
                 <p class="text-[10px] font-extrabold text-purple-600 mt-1">
                     <span>Per Pembimbing</span>
                 </p>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-purple-50/80 text-purple-605 flex items-center justify-center text-lg shrink-0">
-                <i class="fa-solid fa-user"></i>
+            <div class="w-12 h-12 rounded-2xl bg-purple-50/80 text-purple-600 flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-user-graduate"></i>
             </div>
         </div>
 
@@ -93,15 +67,41 @@
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">Terdaftar Sejak</p>
-                <h3 class="text-3xl font-black text-slate-800">{{ $oldestJoiningLabel }}</h3>
-                <p class="text-[10px] font-extrabold text-orange-500 mt-1">
+                <h3 class="text-xl font-black text-slate-800">{{ date('M Y') }}</h3>
+                <p class="text-[10px] font-extrabold text-amber-600 mt-1">
                     <span>Bergabung</span>
                 </p>
             </div>
-            <div class="w-12 h-12 rounded-2xl bg-orange-50/80 text-orange-500 flex items-center justify-center text-lg shrink-0">
-                <i class="fa-regular fa-calendar"></i>
+            <div class="w-12 h-12 rounded-2xl bg-amber-50/80 text-amber-600 flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-calendar-days"></i>
             </div>
         </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+        <form method="GET" action="{{ route('admin.supervisors.index') }}" class="flex items-center gap-4">
+            <!-- Search input -->
+            <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                </span>
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama pembimbing, email, atau NIP..."
+                       class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-850 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition">
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3">
+                <button type="submit" class="px-6 py-2.5 bg-[#0B63E5] hover:bg-blue-750 text-white rounded-2xl text-xs font-extrabold transition flex items-center justify-center space-x-1.5 shadow-2xs">
+                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                    <span>Cari</span>
+                </button>
+                <a href="{{ route('admin.supervisors.index') }}" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-2xl text-xs font-extrabold hover:bg-slate-50 transition flex items-center justify-center space-x-1.5 shadow-2xs">
+                    <i class="fa-solid fa-rotate text-xs"></i>
+                    <span>Reset</span>
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- Supervisors Table -->

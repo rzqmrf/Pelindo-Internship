@@ -4,28 +4,39 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
-        <div>
-            <h1 class="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-                <i class="fa-solid fa-clipboard-user text-blue-600"></i>
-                <span>Rekap Kehadiran Peserta Magang (HR)</span>
-            </h1>
-            <p class="text-xs text-slate-500 mt-1">Monitoring kepatuhan jam kerja dan distribusi kehadiran WFO/WFH seluruh divisi.</p>
-        </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Rekap Kehadiran Peserta Magang (HR)" 
+        subtitle="Monitoring kepatuhan jam kerja dan distribusi kehadiran WFO/WFH/WFA seluruh divisi." 
+        icon="fa-solid fa-clipboard-user"
+    />
 
-        <!-- Filter Form -->
-        <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex flex-wrap items-center gap-2">
-            <input type="date" name="date" value="{{ $date }}" class="text-xs rounded-xl border border-slate-200 py-2 px-3 focus:border-blue-500 outline-none">
-            <select name="division_id" class="text-xs rounded-xl border border-slate-200 py-2 px-3 focus:border-blue-500 outline-none">
-                <option value="">Semua Divisi</option>
-                @foreach($divisions as $div)
-                    <option value="{{ $div->id }}" {{ $divisionId == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
-                @endforeach
-            </select>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition">
-                Filter
+    <!-- Filter & Search Bar -->
+    <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
+        <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-600">Tanggal:</label>
+                <input type="date" name="date" value="{{ $date }}" class="text-xs font-bold rounded-2xl border border-slate-200 py-2.5 px-3.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+
+            <div class="flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-600">Divisi:</label>
+                <select name="division_id" class="text-xs font-bold rounded-2xl border border-slate-200 py-2.5 px-3.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    <option value="">Semua Divisi</option>
+                    @foreach($divisions as $div)
+                        <option value="{{ $div->id }}" {{ $divisionId == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="submit" class="bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl transition shadow-xs flex items-center gap-1.5">
+                <i class="fa-solid fa-filter"></i>
+                <span>Filter</span>
             </button>
+            <a href="{{ route('admin.attendance.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-4 py-2.5 rounded-2xl transition flex items-center gap-1.5">
+                <i class="fa-solid fa-rotate"></i>
+                <span>Reset</span>
+            </a>
         </form>
     </div>
 
