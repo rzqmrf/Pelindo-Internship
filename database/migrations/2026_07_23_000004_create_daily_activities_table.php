@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('intern_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('supervisor_id')->nullable()->constrained('users')->onDelete('set null');
             $table->date('date');
-            $table->enum('work_location', ['WFO', 'WFH', 'Leave'])->default('WFO');
+            $table->string('work_location')->default('WFO');
             $table->text('activity_description');
             $table->text('notes')->nullable();
             $table->string('attachment_path')->nullable();

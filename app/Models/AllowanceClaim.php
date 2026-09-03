@@ -17,6 +17,7 @@ class AllowanceClaim extends Model
         'end_date',
         'wfo_count',
         'wfh_count',
+        'wfa_count',
         'leave_count',
         'total_allowance',
         'bank_name',

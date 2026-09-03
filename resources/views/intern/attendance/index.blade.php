@@ -97,6 +97,7 @@
                                 <select name="work_location" class="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-white font-semibold outline-none focus:border-blue-500">
                                     <option value="WFO">WFO (Work From Office - Kantor Pelindo)</option>
                                     <option value="WFH">WFH (Work From Home / Remote)</option>
+                                    <option value="WFA">WFA (Work From Anywhere / Tugas Luar)</option>
                                 </select>
                             </div>
 

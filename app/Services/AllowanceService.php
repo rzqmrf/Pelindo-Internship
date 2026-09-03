@@ -11,6 +11,7 @@ class AllowanceService
 {
     public int $wfoRate = 71250; // Rp 71.250 / hari
     public int $wfhRate = 71250; // Rp 71.250 / hari
+    public int $wfaRate = 71250; // Rp 71.250 / hari (Work From Anywhere / Tugas Luar)
 
     /**
      * Get all 20-weekday periods for an intern.
@@ -91,18 +92,22 @@ class AllowanceService
 
         $wfoCount = $activities->where('work_location', 'WFO')->count();
         $wfhCount = $activities->where('work_location', 'WFH')->count();
+        $wfaCount = $activities->where('work_location', 'WFA')->count();
         $leaveCount = $activities->where('work_location', 'Leave')->count();
 
-        $totalAllowance = ($wfoCount * $this->wfoRate) + ($wfhCount * $this->wfhRate);
+        $totalAllowance = ($wfoCount * $this->wfoRate) + ($wfhCount * $this->wfhRate) + ($wfaCount * $this->wfaRate);
 
         return [
             'wfo_count' => $wfoCount,
             'wfh_count' => $wfhCount,
+            'wfa_count' => $wfaCount,
             'leave_count' => $leaveCount,
             'wfo_rate' => $this->wfoRate,
             'wfh_rate' => $this->wfhRate,
+            'wfa_rate' => $this->wfaRate,
             'wfo_rate_formatted' => 'Rp ' . number_format($this->wfoRate, 0, ',', '.'),
             'wfh_rate_formatted' => 'Rp ' . number_format($this->wfhRate, 0, ',', '.'),
+            'wfa_rate_formatted' => 'Rp ' . number_format($this->wfaRate, 0, ',', '.'),
             'total_allowance' => $totalAllowance,
             'total_allowance_formatted' => 'Rp ' . number_format($totalAllowance, 0, ',', '.'),
         ];

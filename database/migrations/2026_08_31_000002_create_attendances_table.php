@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('intern_id')->constrained('users')->onDelete('cascade');
             $table->date('date');
-            $table->enum('work_location', ['WFO', 'WFH'])->default('WFO');
+            $table->string('work_location')->default('WFO');
             $table->time('check_in_time')->nullable();
             $table->decimal('check_in_lat', 10, 7)->nullable();
             $table->decimal('check_in_lng', 10, 7)->nullable();

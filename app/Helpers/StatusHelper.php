@@ -64,5 +64,32 @@ class StatusHelper
                 'icon' => 'fa-circle-exclamation',
             ],
         };
+    /**
+     * Get badge class and label for Work Location (WFO, WFH, WFA, Leave)
+     */
+    public static function locationBadge(string $location): array
+    {
+        return match ($location) {
+            'WFO' => [
+                'class' => 'bg-blue-50 text-blue-700 border-blue-200',
+                'label' => 'WFO (Kantor)',
+                'icon' => 'fa-building',
+            ],
+            'WFH' => [
+                'class' => 'bg-purple-50 text-purple-700 border-purple-200',
+                'label' => 'WFH (Remote)',
+                'icon' => 'fa-laptop-house',
+            ],
+            'WFA' => [
+                'class' => 'bg-cyan-50 text-cyan-700 border-cyan-200',
+                'label' => 'WFA (Tugas Luar)',
+                'icon' => 'fa-map-location-dot',
+            ],
+            default => [
+                'class' => 'bg-amber-50 text-amber-700 border-amber-200',
+                'label' => 'Izin / Sakit',
+                'icon' => 'fa-calendar-xmark',
+            ],
+        };
     }
 }

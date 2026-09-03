@@ -115,4 +115,28 @@ class NewFeaturesPhase2Test extends TestCase
             'status' => 'processed_by_hr',
         ]);
     }
+
+    public function test_intern_can_checkin_with_wfa_location(): void
+    {
+        $user = User::factory()->create([
+            'role' => 'intern',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)->post('/intern/attendance/check-in', [
+            'work_location' => 'WFA',
+            'check_in_method' => 'geofence',
+            'latitude' => -7.250000,
+            'longitude' => 112.750000,
+            'address' => 'Tugas Luar di Pelabuhan Tanjung Perak',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('attendances', [
+            'intern_id' => $user->id,
+            'work_location' => 'WFA',
+        ]);
+    }
 }

@@ -116,7 +116,7 @@ class InternActivityController extends Controller
 
         $request->validate([
             'date' => 'required|date',
-            'work_location' => 'required|in:WFO,WFH,Leave',
+            'work_location' => 'required|in:WFO,WFH,WFA,Leave',
             'activity_description' => $isSubmit ? 'required|string|min:10' : 'nullable|string',
             'notes' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',
@@ -194,7 +194,7 @@ class InternActivityController extends Controller
 
         $request->validate([
             'date' => 'required|date',
-            'work_location' => 'required|in:WFO,WFH,Leave',
+            'work_location' => 'required|in:WFO,WFH,WFA,Leave',
             'activity_description' => $isSubmit ? 'required|string|min:10' : 'nullable|string',
             'notes' => 'nullable|string',
             'attachment' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120',

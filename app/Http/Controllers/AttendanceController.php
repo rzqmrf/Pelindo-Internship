@@ -81,7 +81,7 @@ class AttendanceController extends Controller
         }
 
         $request->validate([
-            'work_location' => 'required|in:WFO,WFH',
+            'work_location' => 'required|in:WFO,WFH,WFA',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'address' => 'nullable|string|max:255',
