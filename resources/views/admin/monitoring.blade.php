@@ -5,28 +5,20 @@
 @section('content')
 <div class="space-y-6" x-data="{ detailModalOpen: false, selectedActivity: null, rekapModalOpen: false }">
 
-    <!-- Header Card -->
-    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-full bg-blue-50 text-[#0B63E5] flex items-center justify-center text-xl shrink-0">
-                <i class="fa-solid fa-eye text-sm"></i>
-            </div>
-            <div>
-                <div class="flex items-center space-x-2.5">
-                    <h1 class="text-xl font-black text-slate-850 tracking-tight">Monitoring Real-Time Aktivitas Magang</h1>
-                    <span class="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[9px] font-black uppercase tracking-wider shrink-0">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0 animate-pulse"></span>
-                        <span>Live</span>
-                    </span>
-                </div>
-                <p class="text-xs font-semibold text-slate-400 mt-1">Pantau seluruh pengerjaan tugas harian, lokasi kerja (WFO/WFH/Izin), dan status approval dari seluruh divisi Pelindo.</p>
-            </div>
-        </div>
-        <button @click="rekapModalOpen = true" class="py-2.5 px-4 bg-[#0B63E5] hover:bg-blue-750 text-white rounded-2xl text-xs font-black transition flex items-center justify-center space-x-2 shadow-xs shrink-0 self-start md:self-auto">
-            <i class="fa-solid fa-file-csv"></i>
-            <span>Unduh Rekap Divisi</span>
-        </button>
-    </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Monitoring Real-Time Aktivitas Magang" 
+        subtitle="Pantau seluruh pengerjaan tugas harian, lokasi kerja (WFO/WFH/WFA/Izin), dan status approval dari seluruh divisi Pelindo." 
+        icon="fa-solid fa-eye"
+        badge="Live"
+    >
+        <x-slot:action>
+            <button @click="rekapModalOpen = true" class="py-2.5 px-4 bg-[#0B63E5] hover:bg-blue-700 text-white rounded-2xl text-xs font-black transition flex items-center justify-center space-x-2 shadow-xs shrink-0">
+                <i class="fa-solid fa-file-invoice text-xs"></i>
+                <span>Unduh Rekap Divisi</span>
+            </button>
+        </x-slot:action>
+    </x-page-header>
 
     <!-- 5 KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">

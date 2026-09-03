@@ -3,19 +3,17 @@
 @section('page_title', 'Kelola Peserta Magang')
 
 @section('content')
-<div class="space-y-6" x-data="{ addModalOpen: false, editModalOpen: false, activeIntern: null }">
+<div class="space-y-6">
 
-    <!-- Header Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-black text-slate-800 tracking-tight">Manajemen Peserta Magang</h1>
-            <p class="text-xs font-semibold text-slate-400 mt-1">Kelola data peserta magang, pembagian divisi, pembimbing, dan durasi magang di Pelindo.</p>
-        </div>
-        <button @click="addModalOpen = true" class="px-5 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs transition shadow-sm flex items-center justify-center gap-2">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Tambah Peserta Baru</span>
-        </button>
-    </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Manajemen Peserta Magang" 
+        subtitle="Kelola data peserta magang, pembagian divisi, pembimbing, dan durasi magang di Pelindo." 
+        icon="fa-solid fa-users"
+        action-route="{{ route('admin.interns.create') }}"
+        action-label="Tambah Peserta Baru"
+        action-icon="fa-solid fa-user-plus"
+    />
 
     <!-- 4 KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -157,7 +155,9 @@
                                         {{ strtoupper(substr($profile->user?->name ?? 'U', 0, 1)) }}
                                     </div>
                                     <div class="space-y-0.5">
-                                        <p class="font-extrabold text-slate-800 text-sm leading-tight">{{ $profile->user?->name }}</p>
+                                        <a href="{{ route('admin.interns.show', $profile->id) }}" class="font-extrabold text-slate-800 text-sm leading-tight hover:text-[#0B63E5] transition">
+                                            {{ $profile->user?->name }}
+                                        </a>
                                         <div class="flex items-center space-x-1 text-[11px] text-slate-400 font-semibold">
                                             <i class="fa-regular fa-envelope w-3.5 text-slate-400"></i>
                                             <span>{{ $profile->user?->email }}</span>
@@ -210,13 +210,19 @@
                                 </span>
                             </td>
 
-                            <!-- Column 6: Aksi -->
-                            <td class="py-3.5 px-5 text-right space-x-1">
-                                <button @click="activeIntern = {{ json_encode($profile) }}; editModalOpen = true" 
-                                        class="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-100 rounded-xl transition text-xs font-semibold"
-                                        title="Edit Data">
+                            <!-- Column 6: Aksi (Dedicated Pages) -->
+                            <td class="py-3.5 px-5 text-right space-x-1 whitespace-nowrap">
+                                <a href="{{ route('admin.interns.show', $profile->id) }}" 
+                                   class="p-2 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-600 border border-blue-100 rounded-xl transition text-xs font-semibold inline-flex items-center justify-center"
+                                   title="Detail Track Record">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+
+                                <a href="{{ route('admin.interns.edit', $profile->id) }}" 
+                                   class="p-2 bg-amber-50 hover:bg-amber-500 hover:text-white text-amber-600 border border-amber-100 rounded-xl transition text-xs font-semibold inline-flex items-center justify-center"
+                                   title="Edit Data">
                                     <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
+                                </a>
                                 
                                 <form action="{{ route('admin.interns.delete', $profile->id) }}" method="POST" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus peserta ini?')">
                                     @csrf
@@ -242,244 +248,6 @@
                 {{ $interns->links() }}
             </div>
         @endif
-    </div>
-
-    <!-- Modal Tambah Peserta Baru -->
-    <div x-show="addModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4" x-cloak>
-        <div @click.outside="addModalOpen = false" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-base font-black text-slate-800">Tambah Peserta Magang Baru</h3>
-                <button @click="addModalOpen = false" class="text-slate-400 hover:text-slate-650"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <form action="{{ route('admin.interns.store') }}" method="POST" class="space-y-4 text-xs font-bold text-slate-700">
-                @csrf
-                
-                <div>
-                    <label class="block font-black text-slate-700 mb-1.5">Nama Lengkap Peserta *</label>
-                    <input type="text" name="name" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Alamat Email *</label>
-                        <input type="email" name="email" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">No. Telepon / WhatsApp</label>
-                        <input type="text" name="phone" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Instansi / Universitas *</label>
-                        <input type="text" name="institution" placeholder="Contoh: ITS Surabaya" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">NIM / NIS *</label>
-                        <input type="text" name="student_id_number" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">NIK / No. KTP</label>
-                        <input type="text" name="nik_number" placeholder="16 Digit No. KTP" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Program Studi / Jurusan *</label>
-                        <input type="text" name="major" placeholder="Contoh: Teknik Informatika" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <!-- Bank Info Group for stipend -->
-                <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                    <p class="font-extrabold text-[11px] text-[#0B63E5] uppercase tracking-wider"><i class="fa-solid fa-credit-card mr-1"></i> Data Rekening Uang Saku</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block font-bold text-slate-550 text-[10px] mb-1">Nama Bank</label>
-                            <input type="text" name="bank_name" placeholder="Contoh: Mandiri" class="w-full px-3 py-2 border border-slate-250 rounded-xl bg-white text-xs font-bold focus:outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-550 text-[10px] mb-1">No. Rekening</label>
-                            <input type="text" name="bank_account_number" placeholder="No. Rekening" class="w-full px-3 py-2 border border-slate-250 rounded-xl bg-white text-xs font-bold focus:outline-none transition">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block font-bold text-slate-550 text-[10px] mb-1">Atas Nama Rekening</label>
-                        <input type="text" name="bank_account_holder" placeholder="Nama Pemilik Rekening" class="w-full px-3 py-2 border border-slate-250 rounded-xl bg-white text-xs font-bold focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Divisi Magang Pelindo *</label>
-                        <select name="division_id" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                            <option value="">-- Pilih Divisi --</option>
-                            @foreach($divisions as $div)
-                                <option value="{{ $div->id }}">{{ $div->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Pembimbing Lapangan *</label>
-                        <select name="supervisor_id" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                            <option value="">-- Pilih Pembimbing --</option>
-                            @foreach($supervisors as $spv)
-                                <option value="{{ $spv->id }}">{{ $spv->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Tanggal Mulai *</label>
-                        <input type="date" name="start_date" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Tanggal Selesai *</label>
-                        <input type="date" name="end_date" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-black text-slate-700 mb-1.5">Password Akun *</label>
-                    <input type="password" name="password" required value="password123" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    <p class="text-[10px] text-slate-400 mt-1">Default password diset ke `password123`.</p>
-                </div>
-
-                <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                    <button type="button" @click="addModalOpen = false" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition font-extrabold">Batal</button>
-                    <button type="submit" class="px-5 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white rounded-xl transition font-extrabold">Simpan Peserta</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal Edit Peserta -->
-    <div x-show="editModalOpen" x-transition.opacity class="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4" x-cloak>
-        <template x-if="activeIntern">
-            <div @click.outside="editModalOpen = false" class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 class="text-base font-black text-slate-800">Edit Data Peserta Magang</h3>
-                    <button @click="editModalOpen = false" class="text-slate-400 hover:text-slate-650"><i class="fa-solid fa-xmark text-lg"></i></button>
-                </div>
-
-                <form :action="'{{ url('/admin/interns') }}/' + activeIntern.id" method="POST" class="space-y-4 text-xs font-bold text-slate-700">
-                    @csrf
-                    @method('PUT')
-                    
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Nama Lengkap Peserta *</label>
-                        <input type="text" name="name" :value="activeIntern.user.name" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Alamat Email *</label>
-                            <input type="email" name="email" :value="activeIntern.user.email" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">No. Telepon</label>
-                            <input type="text" name="phone" :value="activeIntern.user.phone" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Instansi *</label>
-                            <input type="text" name="institution" :value="activeIntern.institution" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">NIM / NIS *</label>
-                            <input type="text" name="student_id_number" :value="activeIntern.student_id_number" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">NIK / No. KTP</label>
-                            <input type="text" name="nik_number" :value="activeIntern.nik_number" placeholder="16 digit NIK" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Jurusan *</label>
-                            <input type="text" name="major" :value="activeIntern.major" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <!-- Bank Info Group for stipend -->
-                    <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                        <p class="font-extrabold text-[11px] text-[#0B63E5] uppercase tracking-wider"><i class="fa-solid fa-credit-card mr-1"></i> Data Rekening Uang Saku</p>
-                        <div class="grid grid-cols-2 gap-2">
-                            <div>
-                                <label class="block font-bold text-slate-555 text-[10px] mb-1">Nama Bank</label>
-                                <input type="text" name="bank_name" :value="activeIntern.bank_name" placeholder="Contoh: Mandiri" class="w-full px-3 py-2 border border-slate-250 rounded-xl bg-white text-xs font-bold focus:outline-none transition">
-                            </div>
-                            <div>
-                                <label class="block font-bold text-slate-555 text-[10px] mb-1">No. Rekening</label>
-                                <input type="text" name="bank_account_number" :value="activeIntern.bank_account_number" placeholder="No. Rekening" class="w-full px-3 py-2 border border-slate-250 rounded-xl bg-white text-xs font-bold focus:outline-none transition">
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block font-bold text-slate-555 text-[10px] mb-1">Atas Nama Rekening</label>
-                            <input type="text" name="bank_account_holder" :value="activeIntern.bank_account_holder" placeholder="Nama Pemilik Rekening" class="w-full px-3 py-2 border border-slate-250 rounded-xl bg-white text-xs font-bold focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Divisi Magang *</label>
-                            <select name="division_id" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                                @foreach($divisions as $div)
-                                    <option value="{{ $div->id }}" :selected="activeIntern.division_id == {{ $div->id }}">{{ $div->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Pembimbing *</label>
-                            <select name="supervisor_id" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                                @foreach($supervisors as $spv)
-                                    <option value="{{ $spv->id }}" :selected="activeIntern.supervisor_id == {{ $spv->id }}">{{ $spv->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Tanggal Mulai *</label>
-                            <input type="date" name="start_date" :value="activeIntern.start_date ? activeIntern.start_date.substring(0,10) : ''" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block font-black text-slate-700 mb-1.5">Tanggal Selesai *</label>
-                            <input type="date" name="end_date" :value="activeIntern.end_date ? activeIntern.end_date.substring(0,10) : ''" required class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Status Keaktifan *</label>
-                        <select name="status" required class="w-full px-3 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                            <option value="active" :selected="activeIntern.status == 'active'">Aktif</option>
-                            <option value="completed" :selected="activeIntern.status == 'completed'">Selesai Magang</option>
-                            <option value="extended" :selected="activeIntern.status == 'extended'">Diperpanjang</option>
-                            <option value="terminated" :selected="activeIntern.status == 'terminated'">Nonaktif / Dikeluarkan</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block font-black text-slate-700 mb-1.5">Reset Password (Opsional)</label>
-                        <input type="password" name="password" placeholder="Kosongkan jika tidak diubah" class="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                    </div>
-
-                    <div class="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                        <button type="button" @click="editModalOpen = false" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl transition font-extrabold">Batal</button>
-                        <button type="submit" class="px-5 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white rounded-xl transition font-extrabold">Update Peserta</button>
-                    </div>
-                </form>
-            </div>
-        </template>
     </div>
 
 </div>

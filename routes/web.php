@@ -52,9 +52,12 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
-        // Manage Interns
+        // Manage Interns (Dedicated Full Pages)
         Route::get('/interns', [AdminController::class, 'interns'])->name('interns.index');
+        Route::get('/interns/create', [AdminController::class, 'createIntern'])->name('interns.create');
         Route::post('/interns', [AdminController::class, 'storeIntern'])->name('interns.store');
+        Route::get('/interns/{id}', [AdminController::class, 'showIntern'])->name('interns.show');
+        Route::get('/interns/{id}/edit', [AdminController::class, 'editIntern'])->name('interns.edit');
         Route::put('/interns/{id}', [AdminController::class, 'updateIntern'])->name('interns.update');
         Route::delete('/interns/{id}', [AdminController::class, 'deleteIntern'])->name('interns.delete');
 

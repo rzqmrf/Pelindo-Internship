@@ -17,6 +17,8 @@ class InternProfile extends Model
         'nik_number',
         'institution',
         'major',
+        'religion',
+        'gender',
         'bank_name',
         'bank_account_number',
         'bank_account_holder',

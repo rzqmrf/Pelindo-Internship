@@ -7,6 +7,8 @@ use App\Models\Division;
 use App\Models\InternProfile;
 use App\Models\SupervisorProfile;
 use App\Models\DailyActivity;
+use App\Models\Attendance;
+use App\Models\AllowanceClaim;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -162,6 +164,33 @@ class AdminController extends Controller
         ));
     }
 
+    public function createIntern()
+    {
+        $divisions = Division::all();
+        $supervisors = User::where('role', 'supervisor')->where('is_active', true)->get();
+        return view('admin.interns.create', compact('divisions', 'supervisors'));
+    }
+
+    public function showIntern($id)
+    {
+        $intern = InternProfile::with(['user', 'division', 'supervisor'])->findOrFail($id);
+        $user = $intern->user;
+        $attendances = Attendance::where('intern_id', $user->id)->latest()->take(10)->get();
+        $activities = DailyActivity::where('intern_id', $user->id)->latest()->take(10)->get();
+        $claims = AllowanceClaim::where('intern_id', $user->id)->latest()->get();
+        $certificate = \App\Models\Certificate::where('intern_id', $user->id)->first();
+
+        return view('admin.interns.show', compact('intern', 'user', 'attendances', 'activities', 'claims', 'certificate'));
+    }
+
+    public function editIntern($id)
+    {
+        $intern = InternProfile::with(['user', 'division', 'supervisor'])->findOrFail($id);
+        $divisions = Division::all();
+        $supervisors = User::where('role', 'supervisor')->where('is_active', true)->get();
+        return view('admin.interns.edit', compact('intern', 'divisions', 'supervisors'));
+    }
+
     public function storeIntern(Request $request)
     {
         $request->validate([
@@ -174,6 +203,9 @@ class AdminController extends Controller
             'nik_number' => 'nullable|string|max:30',
             'institution' => 'required|string|max:255',
             'major' => 'required|string|max:255',
+            'religion' => 'nullable|string|max:50',
+            'gender' => 'nullable|string|max:10',
+            'address' => 'nullable|string|max:500',
             'bank_name' => 'nullable|string|max:100',
             'bank_account_number' => 'nullable|string|max:50',
             'bank_account_holder' => 'nullable|string|max:255',
@@ -210,6 +242,9 @@ class AdminController extends Controller
             'nik_number' => $request->nik_number,
             'institution' => $request->institution,
             'major' => $request->major,
+            'religion' => $request->religion,
+            'gender' => $request->gender,
+            'address' => $request->address,
             'bank_name' => $request->bank_name,
             'bank_account_number' => $request->bank_account_number,
             'bank_account_holder' => $request->bank_account_holder,
@@ -218,7 +253,7 @@ class AdminController extends Controller
             'status' => 'active',
         ]);
 
-        return redirect()->back()->with('success', 'Peserta magang baru berhasil ditambahkan.');
+        return redirect()->route('admin.interns.index')->with('success', 'Peserta magang baru berhasil ditambahkan.');
     }
 
     public function updateIntern(Request $request, $id)
@@ -236,6 +271,9 @@ class AdminController extends Controller
             'nik_number' => 'nullable|string|max:30',
             'institution' => 'required|string|max:255',
             'major' => 'required|string|max:255',
+            'religion' => 'nullable|string|max:50',
+            'gender' => 'nullable|string|max:10',
+            'address' => 'nullable|string|max:500',
             'bank_name' => 'nullable|string|max:100',
             'bank_account_number' => 'nullable|string|max:50',
             'bank_account_holder' => 'nullable|string|max:255',
@@ -261,6 +299,9 @@ class AdminController extends Controller
             'nik_number' => $request->nik_number,
             'institution' => $request->institution,
             'major' => $request->major,
+            'religion' => $request->religion,
+            'gender' => $request->gender,
+            'address' => $request->address,
             'bank_name' => $request->bank_name,
             'bank_account_number' => $request->bank_account_number,
             'bank_account_holder' => $request->bank_account_holder,
@@ -269,7 +310,7 @@ class AdminController extends Controller
             'status' => $request->status,
         ]);
 
-        return redirect()->back()->with('success', 'Data peserta magang berhasil diperbarui.');
+        return redirect()->route('admin.interns.index')->with('success', 'Data peserta magang berhasil diperbarui.');
     }
 
     public function deleteIntern($id)

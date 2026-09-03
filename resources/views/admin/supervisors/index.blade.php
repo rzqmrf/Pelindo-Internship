@@ -5,17 +5,19 @@
 @section('content')
 <div class="space-y-6" x-data="{ addModalOpen: false, editModalOpen: false, activeSupervisor: null }">
 
-    <!-- Header Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-xl font-black text-slate-800 tracking-tight">Manajemen Pembimbing Lapangan</h1>
-            <p class="text-xs font-semibold text-slate-400 mt-1">Kelola data pembimbing (mentor/supervisor) per divisi di PT Pelabuhan Indonesia.</p>
-        </div>
-        <button @click="addModalOpen = true" class="px-5 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs transition shadow-sm flex items-center justify-center gap-2">
-            <i class="fa-solid fa-plus text-xs"></i>
-            <span>Tambah Pembimbing Baru</span>
-        </button>
-    </div>
+    <!-- Centralized Page Header -->
+    <x-page-header 
+        title="Manajemen Pembimbing Lapangan" 
+        subtitle="Kelola data pembimbing (mentor/supervisor) per divisi di PT Pelabuhan Indonesia." 
+        icon="fa-solid fa-graduation-cap"
+    >
+        <x-slot:action>
+            <button @click="addModalOpen = true" class="px-5 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs transition shadow-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>Tambah Pembimbing Baru</span>
+            </button>
+        </x-slot:action>
+    </x-page-header>
 
     <!-- Search Bar -->
     <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
