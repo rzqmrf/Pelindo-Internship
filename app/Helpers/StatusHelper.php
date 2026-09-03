@@ -64,6 +64,8 @@ class StatusHelper
                 'icon' => 'fa-circle-exclamation',
             ],
         };
+    }
+
     /**
      * Get badge class and label for Work Location (WFO, WFH, WFA, Leave)
      */
