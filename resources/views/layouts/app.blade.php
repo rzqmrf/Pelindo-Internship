@@ -237,11 +237,6 @@
                     </a>
                 @endif
 
-                <a href="{{ route('profile.show') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('profile*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
-                    <i class="fa-regular fa-user text-slate-400 text-sm w-5"></i>
-                    <span>Profil</span>
-                </a>
-
                 <!-- Illustration checklist card in sidebar for Interns matching screenshot -->
                 @if(Auth::user()->isIntern())
                     <div class="bg-blue-50/30 rounded-3xl p-4 border border-blue-50/60 text-center space-y-3 mt-6">
@@ -271,17 +266,6 @@
                     </div>
                 @endif
             </nav>
-
-            <!-- Bottom Exit Button matching screenshot -->
-            <div class="p-4 border-t border-slate-50 bg-white">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-slate-50/60 hover:bg-rose-50 text-slate-600 hover:text-rose-600 rounded-2xl text-xs font-bold transition border border-slate-200/60 shadow-2xs">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                        <span>Keluar Akun</span>
-                    </button>
-                </form>
-            </div>
         </aside>
 
         <!-- Overlay backdrop for mobile -->
