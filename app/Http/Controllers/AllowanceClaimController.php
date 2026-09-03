@@ -8,88 +8,21 @@ use App\Models\InternProfile;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Division;
+use App\Services\AllowanceService;
+use App\Services\FileStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class AllowanceClaimController extends Controller
 {
-    // Rates configuration
-    private $wfoRate = 71250; // Rp 71.250 / hari
-    private $wfhRate = 71250; // Rp 71.250 / hari
+    protected AllowanceService $allowanceService;
+    protected FileStorageService $fileStorageService;
 
-    /**
-     * Helper to get all 20-weekday periods for an intern.
-     */
-    private function getInternPeriods($user)
+    public function __construct(AllowanceService $allowanceService, FileStorageService $fileStorageService)
     {
-        $profile = $user->internProfile;
-        if (!$profile || !$profile->start_date) {
-            return [];
-        }
-
-        $startDate = Carbon::parse($profile->start_date);
-        $endDateLimit = Carbon::parse($profile->end_date ?? now());
-        if ($endDateLimit->gt(now())) {
-            $endDateLimit = now();
-        }
-
-        $periods = [];
-        $currentDate = $startDate->copy();
-        $periodNum = 1;
-
-        // Loop and chunk into 20 weekdays periods
-        while ($currentDate->lte($endDateLimit)) {
-            $periodStartDate = $currentDate->copy();
-            
-            // Find the 20th weekday starting from $currentDate
-            $weekdayCount = 0;
-            $periodEndDate = $currentDate->copy();
-            
-            while ($weekdayCount < 20 && $periodEndDate->lte($endDateLimit)) {
-                if (!$periodEndDate->isWeekend()) {
-                    $weekdayCount++;
-                }
-                if ($weekdayCount < 20) {
-                    $periodEndDate->addDay();
-                }
-            }
-
-            // Check if the 20 weekdays are fully reached
-            if ($weekdayCount === 20) {
-                // Check if already claimed and not rejected
-                $exists = $user->allowanceClaims()
-                    ->where('period_number', $periodNum)
-                    ->where('status', '!=', 'rejected')
-                    ->exists();
-
-                $periods[] = [
-                    'number' => $periodNum,
-                    'start_date' => $periodStartDate->format('Y-m-d'),
-                    'end_date' => $periodEndDate->format('Y-m-d'),
-                    'label' => "Periode " . $periodNum . " (" . $periodStartDate->isoFormat('D MMMM') . " - " . $periodEndDate->isoFormat('D MMMM YYYY') . ")",
-                    'claimed' => $exists,
-                    'in_progress' => false,
-                ];
-            } else {
-                // In progress
-                $periods[] = [
-                    'number' => $periodNum,
-                    'start_date' => $periodStartDate->format('Y-m-d'),
-                    'end_date' => $periodEndDate->format('Y-m-d'),
-                    'label' => "Periode " . $periodNum . " (" . $periodStartDate->isoFormat('D MMMM') . " - " . $periodEndDate->isoFormat('D MMMM YYYY') . ") [Berjalan]",
-                    'claimed' => false,
-                    'in_progress' => true,
-                ];
-                break; // Break since the current period is in progress
-            }
-
-            // Move to the next weekday after $periodEndDate
-            $currentDate = $periodEndDate->copy()->addDay();
-            $periodNum++;
-        }
-
-        return $periods;
+        $this->allowanceService = $allowanceService;
+        $this->fileStorageService = $fileStorageService;
     }
 
     /**
@@ -102,7 +35,7 @@ class AllowanceClaimController extends Controller
         $claims = $user->allowanceClaims()->orderBy('period_number', 'desc')->get();
         $profile = $user->internProfile;
 
-        $allPeriods = $this->getInternPeriods($user);
+        $allPeriods = $this->allowanceService->getInternPeriods($user);
         
         // Filter periods that are completed and not yet claimed
         $availablePeriods = array_filter($allPeriods, function($p) {
@@ -122,30 +55,13 @@ class AllowanceClaimController extends Controller
             'end_date' => 'required|date',
         ]);
 
-        $userId = Auth::id();
+        $breakdown = $this->allowanceService->calculateBreakdown(
+            Auth::id(),
+            $request->start_date,
+            $request->end_date
+        );
 
-        $activities = DailyActivity::where('intern_id', $userId)
-            ->whereBetween('date', [$request->start_date, $request->end_date])
-            ->whereIn('status', ['approved', 'pending', 'revision'])
-            ->get();
-
-        $wfoCount = $activities->where('work_location', 'WFO')->count();
-        $wfhCount = $activities->where('work_location', 'WFH')->count();
-        $leaveCount = $activities->where('work_location', 'Leave')->count();
-
-        $totalAllowance = ($wfoCount * $this->wfoRate) + ($wfhCount * $this->wfhRate);
-
-        return response()->json([
-            'wfo_count' => $wfoCount,
-            'wfh_count' => $wfhCount,
-            'leave_count' => $leaveCount,
-            'wfo_rate' => $this->wfoRate,
-            'wfh_rate' => $this->wfhRate,
-            'wfo_rate_formatted' => 'Rp ' . number_format($this->wfoRate, 0, ',', '.'),
-            'wfh_rate_formatted' => 'Rp ' . number_format($this->wfhRate, 0, ',', '.'),
-            'total_allowance' => $totalAllowance,
-            'total_allowance_formatted' => 'Rp ' . number_format($totalAllowance, 0, ',', '.'),
-        ]);
+        return response()->json($breakdown);
     }
 
     /**
@@ -370,5 +286,123 @@ class AllowanceClaimController extends Controller
         ]);
 
         return redirect()->route('admin.allowance.index')->with('success', 'Klaim uang saku berhasil ditandai sebagai dicairkan.');
+    }
+
+    /**
+     * Bulk Process / Mark as paid by HR Admin.
+     */
+    public function bulkProcessHr(Request $request)
+    {
+        Carbon::setLocale('id');
+        $request->validate([
+            'claim_ids' => 'required|array',
+            'claim_ids.*' => 'exists:allowance_claims,id',
+        ]);
+
+        $claims = AllowanceClaim::whereIn('id', $request->claim_ids)->get();
+        $count = 0;
+
+        foreach ($claims as $claim) {
+            if ($claim->status !== 'processed_by_hr') {
+                $claim->update([
+                    'status' => 'processed_by_hr',
+                    'hr_note' => 'Pencairan massal via HR Payroll Portal',
+                ]);
+
+                $formattedPeriodLabel = 'Periode ' . $claim->period_number . ' (' . Carbon::parse($claim->start_date)->isoFormat('D MMMM') . ' - ' . Carbon::parse($claim->end_date)->isoFormat('D MMMM YYYY') . ')';
+
+                Notification::sendToUser(
+                    $claim->intern_id,
+                    'Uang Saku Dicairkan! 💸',
+                    'Klaim uang saku Anda untuk ' . $formattedPeriodLabel . ' senilai Rp ' . number_format($claim->total_allowance, 0, ',', '.') . ' telah dicairkan oleh HR Admin ke rekening ' . $claim->bank_name . '.'
+                );
+
+                $count++;
+            }
+        }
+
+        return redirect()->route('admin.allowance.index')->with('success', "Sebanyak {$count} klaim uang saku berhasil dicairkan secara massal.");
+    }
+
+    /**
+     * Export Payroll Allowance Rekap to CSV/Excel format for HR Admin.
+     */
+    public function exportPayrollExcel(Request $request)
+    {
+        Carbon::setLocale('id');
+        $query = AllowanceClaim::with(['intern.internProfile.division']);
+
+        if ($request->filled('division_id')) {
+            $query->whereHas('intern.internProfile', function ($q) use ($request) {
+                $q->where('division_id', $request->division_id);
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $claims = $query->orderBy('period_number', 'desc')->get();
+
+        $filename = 'Rekap_Uang_Saku_Pelindo_' . date('Ymd_His') . '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($claims) {
+            $file = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel compatibility
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Column titles
+            fputcsv($file, [
+                'ID Klaim',
+                'NIK',
+                'Nama Intern',
+                'NIM / NIS',
+                'Divisi / Unit Kerja',
+                'Periode Ke',
+                'Tanggal Mulai',
+                'Tanggal Selesai',
+                'Hari WFO',
+                'Hari WFH',
+                'Hari Izin',
+                'Total Uang Saku (Rp)',
+                'Nama Bank',
+                'Nomor Rekening',
+                'Atas Nama Rekening',
+                'Status Klaim',
+                'Tanggal Pengajuan',
+            ]);
+
+            foreach ($claims as $c) {
+                $profile = $c->intern?->internProfile;
+                fputcsv($file, [
+                    $c->id,
+                    $profile?->nik_number ?? '-',
+                    $c->intern?->name ?? '-',
+                    $profile?->student_id_number ?? '-',
+                    $profile?->division?->name ?? 'Divisi',
+                    'Periode ' . $c->period_number,
+                    $c->start_date ? Carbon::parse($c->start_date)->format('d/m/Y') : '-',
+                    $c->end_date ? Carbon::parse($c->end_date)->format('d/m/Y') : '-',
+                    $c->wfo_count,
+                    $c->wfh_count,
+                    $c->leave_count,
+                    $c->total_allowance,
+                    $c->bank_name,
+                    "'" . $c->bank_account_number, // Single quote to prevent Excel scientific notation
+                    $c->bank_account_holder,
+                    strtoupper($c->status),
+                    $c->created_at ? $c->created_at->format('d/m/Y H:i') : '-',
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 }

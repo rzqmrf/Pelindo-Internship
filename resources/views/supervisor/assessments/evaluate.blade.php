@@ -41,6 +41,38 @@
         </div>
     </div>
 
+    <!-- Final Project Submission Review Card -->
+    @if($assessment?->final_project_title)
+        <div class="bg-gradient-to-br from-slate-900 to-blue-950 text-white rounded-3xl p-6 shadow-md border border-slate-800 space-y-3">
+            <div class="flex items-center justify-between">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                    <i class="fa-solid fa-file-contract"></i> Laporan Akhir & Final Project Intern
+                </span>
+                <span class="text-[11px] text-slate-400">
+                    Diunggah: {{ $assessment->submitted_at ? $assessment->submitted_at->isoFormat('D MMMM YYYY, HH:mm') : '-' }}
+                </span>
+            </div>
+
+            <h3 class="text-base font-extrabold text-white tracking-tight">{{ $assessment->final_project_title }}</h3>
+
+            <div class="flex flex-wrap gap-3 pt-1 text-xs">
+                @if($assessment->final_project_file)
+                    <a href="{{ asset($assessment->final_project_file) }}" target="_blank" class="inline-flex items-center space-x-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl transition">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Unduh Berkas Laporan</span>
+                    </a>
+                @endif
+
+                @if($assessment->final_project_link)
+                    <a href="{{ $assessment->final_project_link }}" target="_blank" class="inline-flex items-center space-x-1.5 bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2 rounded-xl border border-white/20 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>Buka Slide / Repository Project</span>
+                    </a>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <!-- Evaluation Form -->
     <form action="{{ route('supervisor.assessments.store', ['intern_id' => $intern->id]) }}" method="POST" class="space-y-6">
         @csrf

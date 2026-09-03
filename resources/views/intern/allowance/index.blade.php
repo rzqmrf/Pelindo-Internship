@@ -269,6 +269,99 @@
                             </span>
                         </div>
 
+                        <!-- KIP-K Style Detailed Disbursement Tracking Stepper -->
+                        @if($claim->status === 'rejected')
+                            <div class="p-3.5 bg-rose-50 border border-rose-200/80 rounded-2xl text-xs text-rose-800 flex items-start space-x-3">
+                                <div class="w-7 h-7 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                </div>
+                                <div>
+                                    <strong class="font-extrabold block text-rose-900">Klaim Ditolak Pembimbing Lapangan</strong>
+                                    <span class="text-[11px] text-rose-700 font-semibold block mt-0.5">Catatan: "{{ $claim->supervisor_note ?? 'Berkas/rekapitulasi belum memenuhi ketentuan.' }}"</span>
+                                </div>
+                            </div>
+                        @else
+                            @php
+                                $s1 = true;
+                                $s2 = in_array($claim->status, ['approved_by_supervisor', 'processed_by_hr']);
+                                $s3 = in_array($claim->status, ['approved_by_supervisor', 'processed_by_hr']);
+                                $s4 = $claim->status === 'processed_by_hr';
+                            @endphp
+
+                            <div class="p-4 bg-gradient-to-br from-slate-900 via-slate-850 to-blue-950 text-white rounded-2xl space-y-3.5 shadow-sm border border-slate-800">
+                                <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                                    <div class="flex items-center space-x-2">
+                                        <span class="w-2 h-2 rounded-full {{ $s4 ? 'bg-emerald-400 animate-ping' : 'bg-amber-400 animate-pulse' }}"></span>
+                                        <span class="text-[11px] font-extrabold text-blue-200 uppercase tracking-wider">Lacak Status Pencairan Uang Saku</span>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-slate-400">
+                                        {{ $s4 ? 'Status: SP2D / Cair' : ($s2 ? 'Status: Verifikasi HR' : 'Status: Review Pembimbing') }}
+                                    </span>
+                                </div>
+
+                                <!-- 4 Nodes Grid -->
+                                <div class="grid grid-cols-4 gap-2 relative">
+                                    <!-- Progress Line Background -->
+                                    <div class="absolute top-3.5 left-4 right-4 h-0.5 bg-slate-700 -z-0"></div>
+                                    <!-- Active Progress Line -->
+                                    <div class="absolute top-3.5 left-4 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 transition-all duration-500 -z-0"
+                                         style="width: {{ $s4 ? '88%' : ($s2 ? '60%' : '25%') }};"></div>
+
+                                    <!-- Node 1: Pengajuan -->
+                                    <div class="flex flex-col items-center text-center relative z-10 space-y-1">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold bg-blue-600 text-white ring-4 ring-slate-900 shadow-sm">
+                                            <i class="fa-solid fa-check text-[9px]"></i>
+                                        </div>
+                                        <span class="text-[10px] font-extrabold text-white">1. Pengajuan</span>
+                                        <span class="text-[8px] font-medium text-slate-400">Logbook OK</span>
+                                    </div>
+
+                                    <!-- Node 2: Verifikasi Pembimbing -->
+                                    <div class="flex flex-col items-center text-center relative z-10 space-y-1">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold {{ $s2 ? 'bg-blue-500 text-white ring-4 ring-slate-900 shadow-sm' : 'bg-slate-700 text-slate-400 ring-4 ring-slate-900' }}">
+                                            @if($s2) <i class="fa-solid fa-check text-[9px]"></i> @else <i class="fa-solid fa-spinner animate-spin text-[9px]"></i> @endif
+                                        </div>
+                                        <span class="text-[10px] font-extrabold {{ $s2 ? 'text-white' : 'text-slate-400' }}">2. Pembimbing</span>
+                                        <span class="text-[8px] font-medium text-slate-400">{{ $s2 ? 'Verified' : 'Review' }}</span>
+                                    </div>
+
+                                    <!-- Node 3: Verifikasi HR Admin -->
+                                    <div class="flex flex-col items-center text-center relative z-10 space-y-1">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold {{ $s3 ? ($s4 ? 'bg-blue-500 text-white ring-4 ring-slate-900' : 'bg-amber-500 text-white ring-4 ring-slate-900 animate-pulse') : 'bg-slate-700 text-slate-400 ring-4 ring-slate-900' }}">
+                                            @if($s4) <i class="fa-solid fa-check text-[9px]"></i> @elseif($s3) 3 @else 3 @endif
+                                        </div>
+                                        <span class="text-[10px] font-extrabold {{ $s3 ? 'text-white' : 'text-slate-400' }}">3. Rekap HR</span>
+                                        <span class="text-[8px] font-medium text-slate-400">{{ $s4 ? 'Disetujui' : ($s3 ? 'Verifikasi' : 'Menunggu') }}</span>
+                                    </div>
+
+                                    <!-- Node 4: Transfer / Cair -->
+                                    <div class="flex flex-col items-center text-center relative z-10 space-y-1">
+                                        <div class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold {{ $s4 ? 'bg-emerald-500 text-white ring-4 ring-slate-900 shadow-md shadow-emerald-500/30' : 'bg-slate-700 text-slate-400 ring-4 ring-slate-900' }}">
+                                            @if($s4) <i class="fa-solid fa-coins text-[10px]"></i> @else 4 @endif
+                                        </div>
+                                        <span class="text-[10px] font-extrabold {{ $s4 ? 'text-emerald-300' : 'text-slate-400' }}">4. Pencairan</span>
+                                        <span class="text-[8px] font-medium text-slate-400">{{ $s4 ? 'Transfer Cair' : 'Proses Bank' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Current Status Description Card -->
+                                <div class="bg-white/10 backdrop-blur border border-white/10 rounded-xl p-2.5 text-[10px] flex items-center justify-between">
+                                    <div class="flex items-center space-x-2">
+                                        <i class="fa-solid {{ $s4 ? 'fa-circle-check text-emerald-400' : ($s2 ? 'fa-clock-rotate-left text-amber-300' : 'fa-hourglass-start text-blue-300') }}"></i>
+                                        <span class="font-semibold text-slate-200">
+                                            @if($s4)
+                                                Uang saku sebesar <strong>Rp {{ number_format($claim->total_allowance, 0, ',', '.') }}</strong> telah dicairkan ke rekening {{ $claim->bank_name }}.
+                                            @elseif($s2)
+                                                Klaim disetujui Pembimbing. Menunggu penetapan dan verifikasi rekening oleh HR Admin Pelindo.
+                                            @else
+                                                Pengajuan klaim berhasil dikirim. Menunggu persetujuan Pembimbing Lapangan.
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <!-- Stats and amount -->
                         <div class="grid grid-cols-2 gap-4 text-xs">
                             <div class="space-y-1">

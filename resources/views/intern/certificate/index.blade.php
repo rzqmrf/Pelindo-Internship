@@ -79,6 +79,64 @@
         </div>
     @endif
 
+    <!-- Final Project Submission Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <i class="fa-solid fa-file-arrow-up text-blue-600"></i>
+                <span>Laporan Akhir Magang & Karya Final Project</span>
+            </h3>
+            @if($assessment?->submitted_at)
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <i class="fa-solid fa-check"></i> Sudah Diunggah
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                    <i class="fa-solid fa-clock"></i> Belum Diunggah
+                </span>
+            @endif
+        </div>
+
+        @if(session('success'))
+            <div class="p-4 rounded-2xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-2">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
+
+        <form action="{{ route('intern.certificate.final_project') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            @csrf
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Judul Laporan Akhir / Final Project <span class="text-rose-500">*</span></label>
+                <input type="text" name="final_project_title" required value="{{ old('final_project_title', $assessment?->final_project_title) }}" placeholder="Contoh: Otomasi Presensi & Sistem Manajemen Magang Pelindo" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Berkas Laporan (PDF / DOCX) (Maks 10MB)</label>
+                    <input type="file" name="final_project_file" accept=".pdf,.docx,.zip,.rar" class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    @if($assessment?->final_project_file)
+                        <div class="mt-2 text-xs">
+                            <a href="{{ asset($assessment->final_project_file) }}" target="_blank" class="text-blue-600 hover:underline font-bold inline-flex items-center gap-1">
+                                <i class="fa-solid fa-paperclip"></i> Lihat Berkas Terunggah
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Tautan Slide Presentasi / Repository (Opsional)</label>
+                    <input type="url" name="final_project_link" value="{{ old('final_project_link', $assessment?->final_project_link) }}" placeholder="https://drive.google.com/... atau GitHub" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+
+            <button type="submit" class="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Simpan Laporan Akhir</span>
+            </button>
+        </form>
+    </div>
+
     <!-- 5 Competencies Score Breakdown (if assessed) -->
     @if($assessment)
         <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-8 space-y-6">

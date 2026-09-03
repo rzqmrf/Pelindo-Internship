@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#005B9C">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
     <title>{{ config('app.name', 'Pelindo Internship Management System') }}</title>
 
     <!-- Google Fonts: Plus Jakarta Sans -->
@@ -213,6 +217,11 @@
                     <a href="{{ route('intern.certificate.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.certificate*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
                         <i class="fa-solid fa-certificate text-sm w-5"></i>
                         <span>E-Sertifikat & Nilai</span>
+                    </a>
+
+                    <a href="{{ route('intern.survey.index') }}" class="flex items-center space-x-3 px-3.5 py-3 rounded-2xl font-bold text-xs transition {{ request()->routeIs('intern.survey*') ? 'bg-blue-50/70 text-blue-600 border border-blue-100/50' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-star text-amber-500 text-sm w-5"></i>
+                        <span>Survei Kepuasan</span>
                     </a>
                 @endif
 
@@ -472,6 +481,17 @@
         </div>
     </div>
 
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('Pelindo PRO ServiceWorker registered:', reg.scope);
+                }).catch(function(err) {
+                    console.log('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+    </script>
     @stack('scripts')
 </body>
 </html>

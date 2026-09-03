@@ -1,0 +1,17 @@
+{
+  "short_name": "Pelindo PRO",
+  "name": "Pelindo Internship Portal (PRO)",
+  "description": "Portal resmi manajemen magang, presensi geofencing, dan e-sertifikat PT Pelabuhan Indonesia (Persero)",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "start_url": "/login",
+  "background_color": "#002B49",
+  "theme_color": "#005B9C",
+  "display": "standalone",
+  "orientation": "portrait"
+}

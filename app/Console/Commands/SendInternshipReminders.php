@@ -68,12 +68,11 @@ class SendInternshipReminders extends Command
                         ->exists();
 
                     if (!$alreadyNotified) {
-                        Notification::create([
-                            'user_id' => $intern->id,
-                            'title' => '⏰ Pengingat Harian: Isi Presensi & Logbook',
-                            'message' => "Halo {$intern->name}, jangan lupa melakukan presensi dan melengkapi logbook aktivitas magang Anda untuk hari " . $today->isoFormat('dddd, D MMMM YYYY') . '.',
-                            'is_read' => false,
-                        ]);
+                        Notification::sendToUser(
+                            $intern,
+                            '⏰ Pengingat Harian: Isi Presensi & Logbook',
+                            "Halo {$intern->name}, jangan lupa melakukan presensi dan melengkapi logbook aktivitas magang Anda untuk hari " . $today->isoFormat('dddd, D MMMM YYYY') . '.'
+                        );
                         $internReminderCount++;
                     }
                 }
@@ -108,12 +107,11 @@ class SendInternshipReminders extends Command
                     ->exists();
 
                 if (!$alreadyNotifiedSpv) {
-                    Notification::create([
-                        'user_id' => $spv->id,
-                        'title' => '📋 Pengingat: Persetujuan Menunggu Review',
-                        'message' => "Terdapat {$totalPending} pengajuan aktivitas/klaim/izin dari peserta bimbingan Anda yang belum direview.",
-                        'is_read' => false,
-                    ]);
+                    Notification::sendToUser(
+                        $spv,
+                        '📋 Pengingat: Persetujuan Menunggu Review',
+                        "Terdapat {$totalPending} pengajuan aktivitas/klaim/izin dari peserta bimbingan Anda yang belum direview."
+                    );
                     $supervisorReminderCount++;
                 }
             }

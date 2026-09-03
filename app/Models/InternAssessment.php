@@ -22,6 +22,10 @@ class InternAssessment extends Model
         'notes_strengths',
         'notes_improvements',
         'supervisor_recommendation',
+        'final_project_title',
+        'final_project_file',
+        'final_project_link',
+        'submitted_at',
         'status',
         'reviewed_at',
     ];
@@ -33,6 +37,7 @@ class InternAssessment extends Model
         'teamwork_score' => 'integer',
         'attitude_score' => 'integer',
         'final_score' => 'float',
+        'submitted_at' => 'datetime',
         'reviewed_at' => 'datetime',
     ];
 

@@ -7,12 +7,20 @@ use App\Models\DailyActivity;
 use App\Models\InternProfile;
 use App\Models\User;
 use App\Models\Division;
+use App\Services\AttendanceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class AttendanceController extends Controller
 {
+    protected AttendanceService $attendanceService;
+
+    public function __construct(AttendanceService $attendanceService)
+    {
+        $this->attendanceService = $attendanceService;
+    }
+
     // ==========================================
     // INTERN ATTENDANCE
     // ==========================================
@@ -43,6 +51,8 @@ class AttendanceController extends Controller
         $totalWfh = Attendance::where('intern_id', $userId)->where('work_location', 'WFH')->count();
         $totalLate = Attendance::where('intern_id', $userId)->where('status', 'late')->count();
 
+        $dailyQrToken = $this->attendanceService->getDailyQrToken();
+
         return view('intern.attendance.index', compact(
             'todayAttendance',
             'attendances',
@@ -50,7 +60,8 @@ class AttendanceController extends Controller
             'totalPresent',
             'totalWfo',
             'totalWfh',
-            'totalLate'
+            'totalLate',
+            'dailyQrToken'
         ));
     }
 
@@ -75,14 +86,30 @@ class AttendanceController extends Controller
             'longitude' => 'nullable|numeric',
             'address' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:500',
+            'check_in_method' => 'nullable|in:geofence,qr_code',
+            'qr_token' => 'nullable|string',
         ]);
+
+        $checkInMethod = $request->input('check_in_method', 'geofence');
+        $qrTokenVerified = null;
+
+        // Validasi QR Token jika metode yang dipilih adalah QR Code
+        if ($checkInMethod === 'qr_code') {
+            $expectedToken = $this->attendanceService->getDailyQrToken($today);
+            $inputToken = strtoupper(trim($request->qr_token));
+
+            if ($inputToken !== $expectedToken) {
+                return back()->with('error', "Kode QR / Token Presensi Kantor tidak valid. Token hari ini: {$expectedToken}");
+            }
+            $qrTokenVerified = $inputToken;
+        }
 
         $lat = $request->latitude;
         $lng = $request->longitude;
         $distance = null;
 
         if ($lat && $lng) {
-            $distance = Attendance::calculateDistance((float)$lat, (float)$lng);
+            $distance = $this->attendanceService->calculateDistance((float)$lat, (float)$lng);
         }
 
         // Tentukan status terlambat jika check in setelah 08:30
@@ -99,11 +126,13 @@ class AttendanceController extends Controller
             ],
             [
                 'work_location' => $request->work_location,
+                'check_in_method' => $checkInMethod,
+                'qr_token_verified' => $qrTokenVerified,
                 'check_in_time' => $now->format('H:i:s'),
                 'check_in_lat' => $lat,
                 'check_in_lng' => $lng,
                 'check_in_distance_meters' => $distance,
-                'check_in_address' => $request->address,
+                'check_in_address' => $request->address ?? ($checkInMethod === 'qr_code' ? 'Gedung Pelindo Solusi Digital (Scan QR)' : null),
                 'status' => $status,
                 'notes' => $request->notes,
             ]
@@ -126,12 +155,22 @@ class AttendanceController extends Controller
             ]);
         }
 
-        $msg = "Check-in berhasil tercatat pada pukul " . $now->format('H:i:s') . " ({$request->work_location}).";
+        $msg = "Check-in berhasil tercatat via " . ($checkInMethod === 'qr_code' ? 'Scan QR Code Kantor' : 'Geofencing GPS') . " pada pukul " . $now->format('H:i:s') . " ({$request->work_location}).";
         if ($status === 'late') {
             $msg .= " Status: Terlambat (lewat 08:30 WIB).";
         }
 
         return back()->with('success', $msg);
+    }
+
+    /**
+     * Generate dynamic daily QR Token for Office Check-in
+     */
+    public static function getDailyQrToken($date = null): string
+    {
+        $targetDate = $date ? Carbon::parse($date)->format('Y-m-d') : Carbon::today()->format('Y-m-d');
+        $hash = strtoupper(substr(md5('PELINDO_HQ_QR_' . $targetDate . '_' . config('app.key', 'pelindo')), 0, 6));
+        return 'PEL-' . Carbon::parse($targetDate)->format('Ymd') . '-' . $hash;
     }
 
     public function checkOut(Request $request)

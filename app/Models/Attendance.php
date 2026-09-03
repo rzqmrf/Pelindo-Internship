@@ -13,6 +13,8 @@ class Attendance extends Model
         'intern_id',
         'date',
         'work_location',
+        'check_in_method',
+        'qr_token_verified',
         'check_in_time',
         'check_in_lat',
         'check_in_lng',

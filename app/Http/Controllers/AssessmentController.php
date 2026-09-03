@@ -7,6 +7,8 @@ use App\Models\InternAssessment;
 use App\Models\Certificate;
 use App\Models\InternProfile;
 use App\Models\Notification;
+use App\Services\FileStorageService;
+use App\Services\ReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -14,6 +16,15 @@ use Carbon\Carbon;
 
 class AssessmentController extends Controller
 {
+    protected FileStorageService $fileStorageService;
+    protected ReportService $reportService;
+
+    public function __construct(FileStorageService $fileStorageService, ReportService $reportService)
+    {
+        $this->fileStorageService = $fileStorageService;
+        $this->reportService = $reportService;
+    }
+
     // ==========================================
     // SUPERVISOR ENDPOINTS
     // ==========================================
@@ -196,6 +207,58 @@ class AssessmentController extends Controller
         return view('intern.certificate.index', compact('user', 'assessment', 'certificate'));
     }
 
+    public function uploadFinalProject(Request $request)
+    {
+        $user = Auth::user();
+        $profile = $user->internProfile;
+
+        $request->validate([
+            'final_project_title' => 'required|string|max:255',
+            'final_project_file' => 'nullable|file|mimes:pdf,docx,zip,rar|max:10240',
+            'final_project_link' => 'nullable|url|max:500',
+        ]);
+
+        $filePath = null;
+        if ($request->hasFile('final_project_file')) {
+            $filePath = $this->fileStorageService->uploadFile(
+                $request->file('final_project_file'),
+                'projects',
+                'project_' . $user->id
+            );
+        }
+
+        $supervisorId = $profile?->supervisor_id;
+        if (!$supervisorId) {
+            $supervisorId = User::where('role', 'supervisor')->first()?->id ?? $user->id;
+        }
+
+        $assessment = InternAssessment::firstOrNew(
+            ['intern_id' => $user->id],
+            ['supervisor_id' => $supervisorId]
+        );
+
+        $assessment->final_project_title = $request->final_project_title;
+        if ($filePath) {
+            $assessment->final_project_file = $filePath;
+        }
+        if ($request->filled('final_project_link')) {
+            $assessment->final_project_link = $request->final_project_link;
+        }
+        $assessment->submitted_at = Carbon::now();
+        $assessment->save();
+
+        // Notify Supervisor
+        if ($profile?->supervisor_id) {
+            Notification::sendToUser(
+                $profile->supervisor_id,
+                '📑 Laporan Akhir Magang Diunggah',
+                "Peserta bimbingan {$user->name} telah mengunggah Laporan Akhir & Final Project: {$request->final_project_title}."
+            );
+        }
+
+        return redirect()->back()->with('success', 'Laporan Akhir & Final Project berhasil diunggah!');
+    }
+
     public function downloadPdf($token)
     {
         Carbon::setLocale('id');
@@ -228,12 +291,9 @@ class AssessmentController extends Controller
             'companyName' => 'PT PELABUHAN INDONESIA (PERSERO)',
         ];
 
-        $pdf = Pdf::loadView('reports.certificate_pdf', $data);
-        $pdf->setPaper('A4', 'landscape');
-
         $fileName = 'Sertifikat_Magang_Pelindo_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $intern->name) . '.pdf';
 
-        return $pdf->download($fileName);
+        return $this->reportService->generateCertificatePdf($data, $fileName);
     }
 
     // ==========================================

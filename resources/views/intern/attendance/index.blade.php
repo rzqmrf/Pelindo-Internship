@@ -79,17 +79,31 @@
                             <i class="fa-solid fa-check mr-1"></i> Sudah Check-In
                         </button>
                     @else
-                        <form action="{{ route('intern.attendance.checkin') }}" method="POST" id="formCheckIn" class="space-y-3">
+                        <form action="{{ route('intern.attendance.checkin') }}" method="POST" id="formCheckIn" class="space-y-3" x-data="{ method: 'geofence' }">
                             @csrf
                             <input type="hidden" name="latitude" id="checkin_lat">
                             <input type="hidden" name="longitude" id="checkin_lng">
 
                             <div>
-                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Lokasi Kerja</label>
+                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Metode Check-In</label>
+                                <select name="check_in_method" x-model="method" class="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-white font-semibold outline-none focus:border-blue-500">
+                                    <option value="geofence">📍 Geofencing GPS Radius Kantor</option>
+                                    <option value="qr_code">📷 Scan / Input Token QR Kantor</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-[11px] font-bold text-slate-600 block mb-1">Status Kehadiran</label>
                                 <select name="work_location" class="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-white font-semibold outline-none focus:border-blue-500">
                                     <option value="WFO">WFO (Work From Office - Kantor Pelindo)</option>
                                     <option value="WFH">WFH (Work From Home / Remote)</option>
                                 </select>
+                            </div>
+
+                            <div x-show="method === 'qr_code'" x-cloak class="space-y-1">
+                                <label class="text-[11px] font-bold text-slate-600 block">Kode Token QR Kantor Hari Ini</label>
+                                <input type="text" name="qr_token" placeholder="Masukkan Token QR Kantor (e.g. {{ $dailyQrToken }})" class="w-full text-xs rounded-xl border border-slate-200 p-2.5 uppercase font-mono font-bold focus:border-blue-500 outline-none">
+                                <span class="text-[10px] text-slate-400 block">Dapatkan kode token dari display layar presensi divisi/kantor.</span>
                             </div>
 
                             <button type="submit" class="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/25 transition">

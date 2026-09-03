@@ -16,6 +16,13 @@
                 <p class="text-xs font-semibold text-slate-400 mt-1">Kelola pencairan uang saku mahasiswa magang bulanan yang telah disetujui oleh pembimbing lapangan.</p>
             </div>
         </div>
+
+        <div class="flex items-center space-x-2">
+            <a href="{{ route('admin.allowance.export_payroll', request()->all()) }}" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-extrabold transition flex items-center space-x-2 shadow-2xs">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Ekspor Payroll Excel/CSV</span>
+            </a>
+        </div>
     </div>
 
     <!-- Alert Messages -->
@@ -77,11 +84,22 @@
     </div>
 
     <!-- Table/Grid List -->
-    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
+    <form action="{{ route('admin.allowance.bulk_process') }}" method="POST" id="bulkForm" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
+        @csrf
+        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-slate-500">Pilih klaim yang disetujui untuk pencairan massal:</span>
+            <button type="submit" onclick="return confirm('Apakah Anda yakin ingin mencairkan seluruh klaim tercentang?')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs">
+                <i class="fa-solid fa-check-double mr-1"></i> Cairkan Massal Tercentang
+            </button>
+        </div>
+
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                        <th class="py-3.5 px-3 text-center">
+                            <input type="checkbox" onclick="document.querySelectorAll('.claim-checkbox').forEach(cb => cb.checked = this.checked)" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                        </th>
                         <th class="py-3.5 px-5">Periode</th>
                         <th class="py-3.5 px-4">Nama & Divisi</th>
                         <th class="py-3.5 px-4">Presensi</th>
@@ -94,20 +112,16 @@
                 <tbody class="divide-y divide-slate-50 text-xs font-bold text-slate-700">
                     @forelse($claims as $claim)
                         @php
-                            $badgeStyle = match($claim->status) {
-                                'processed_by_hr' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                                'approved_by_supervisor' => 'bg-blue-50 text-blue-600 border-blue-100',
-                                'rejected' => 'bg-rose-50 text-rose-600 border-rose-100',
-                                default => 'bg-amber-50 text-amber-600 border-amber-100',
-                            };
-                            $statusLabel = match($claim->status) {
-                                'processed_by_hr' => 'Dicairkan',
-                                'approved_by_supervisor' => 'Disetujui Pembimbing',
-                                'rejected' => 'Ditolak',
-                                default => 'Menunggu Pembimbing',
-                            };
+                            $badge = App\Helpers\StatusHelper::claimBadge($claim->status);
                         @endphp
                         <tr class="hover:bg-slate-50/40 transition">
+                            <td class="py-4 px-3 text-center">
+                                @if($claim->status === 'approved_by_supervisor')
+                                    <input type="checkbox" name="claim_ids[]" value="{{ $claim->id }}" class="claim-checkbox rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
+                                @else
+                                    <span class="text-slate-300">&bull;</span>
+                                @endif
+                            </td>
                             <td class="py-4 px-5 font-black text-slate-800 leading-normal">
                                 <span class="block">Periode {{ $claim->period_number }}</span>
                                 <span class="text-[10px] text-slate-400 font-semibold block mt-0.5">
@@ -139,9 +153,12 @@
                                 <span class="text-[10px] text-slate-450 font-semibold italic">{{ $claim->bank_account_holder }}</span>
                             </td>
                             <td class="py-4 px-4">
-                                <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md border {{ $badgeStyle }}">
-                                    {{ $statusLabel }}
+                                <span class="px-2.5 py-1 text-[9px] font-black uppercase tracking-wider rounded-md border {{ $badge['class'] }} inline-block">
+                                    <i class="fa-solid {{ $badge['icon'] }} mr-1"></i> {{ $badge['label'] }}
                                 </span>
+                                <div class="flex items-center gap-1 mt-1 text-[9px] text-slate-400 font-bold">
+                                    {{ $badge['step'] }}
+                                </div>
                             </td>
                             <td class="py-4 px-5 text-right">
                                 @if($claim->status === 'approved_by_supervisor')
@@ -173,7 +190,7 @@
         <div class="pt-3">
             {{ $claims->links() }}
         </div>
-    </div>
+    </form>
 
     <!-- HR Process Modal -->
     <div x-show="hrModalOpen" 

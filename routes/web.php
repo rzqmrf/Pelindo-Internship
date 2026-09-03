@@ -24,6 +24,10 @@ Route::get('/', function () {
 Route::get('/verify-certificate/{token}', [AssessmentController::class, 'publicVerify'])->name('certificate.verify');
 Route::get('/certificate/download/{token}', [AssessmentController::class, 'downloadPdf'])->name('certificate.download');
 
+Route::get('/manifest.json', function () {
+    return response()->json(json_decode(file_get_contents(public_path('manifest.json')), true));
+});
+
 // Authentication Routes
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -78,6 +82,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Allowance Claims
         Route::get('/allowance', [AllowanceClaimController::class, 'hrIndex'])->name('allowance.index');
+        Route::post('/allowance/bulk-process', [AllowanceClaimController::class, 'bulkProcessHr'])->name('allowance.bulk_process');
+        Route::get('/allowance/export-payroll', [AllowanceClaimController::class, 'exportPayrollExcel'])->name('allowance.export_payroll');
         Route::post('/allowance/{id}/process', [AllowanceClaimController::class, 'hrProcess'])->name('allowance.process');
 
         // Manage Assessments & Certificates
@@ -133,8 +139,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/allowance/calculate', [AllowanceClaimController::class, 'calculate'])->name('allowance.calculate');
         Route::post('/allowance', [AllowanceClaimController::class, 'store'])->name('allowance.store');
 
-        // Certificate & Transcripts
+        // Certificate, Transcripts & Final Project
         Route::get('/certificate', [AssessmentController::class, 'internView'])->name('certificate.index');
+        Route::post('/certificate/final-project', [AssessmentController::class, 'uploadFinalProject'])->name('certificate.final_project');
+
+        // Intern Exit Satisfaction Survey
+        Route::get('/survey', [\App\Http\Controllers\InternSurveyController::class, 'showForm'])->name('survey.index');
+        Route::post('/survey', [\App\Http\Controllers\InternSurveyController::class, 'store'])->name('survey.store');
     });
 
     // Notification Routes

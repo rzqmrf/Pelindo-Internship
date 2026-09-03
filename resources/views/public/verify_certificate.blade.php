@@ -7,11 +7,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between">
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col justify-between" x-data="{ showScanner: false }">
 
     <!-- Navbar -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -25,9 +26,15 @@
                     <p class="text-[10px] font-bold text-blue-600 tracking-wider uppercase mt-0.5">Sistem Verifikasi Sertifikat</p>
                 </div>
             </div>
-            <a href="{{ route('login') }}" class="text-xs font-semibold text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 transition">
-                <i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Portal
-            </a>
+            <div class="flex items-center space-x-2">
+                <button @click="showScanner = !showScanner" class="text-xs font-extrabold text-blue-700 bg-blue-50 hover:bg-blue-100 px-3.5 py-1.5 rounded-lg border border-blue-200 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-qrcode"></i>
+                    <span x-text="showScanner ? 'Tutup Kamera' : 'Scan QR Kamera'">Scan QR Kamera</span>
+                </button>
+                <a href="{{ route('login') }}" class="text-xs font-semibold text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-300 transition">
+                    <i class="fa-solid fa-right-to-bracket mr-1"></i> Masuk Portal
+                </a>
+            </div>
         </div>
     </header>
 
