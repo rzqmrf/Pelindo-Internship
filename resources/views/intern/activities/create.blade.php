@@ -32,7 +32,7 @@
 
     <!-- 3 Info Status Cards Row matching new mockup -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
+
         <!-- Card 1: Tanggal Hari Ini -->
         <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center space-x-3.5">
             <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg font-bold shrink-0">
@@ -75,7 +75,7 @@
     <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-xs">
         <form action="{{ route('intern.activities.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6 text-xs" x-data="{ statusKegiatan: 'WFO', fileName: '' }">
             @csrf
-            
+
             <!-- Row 1: Date & Status Kegiatan Radio Cards -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Field 1: Tanggal Kegiatan -->
@@ -83,7 +83,7 @@
                     <label class="block font-extrabold text-slate-800 mb-2 text-xs">Tanggal Kegiatan *</label>
                     <div class="relative">
                         <input type="date" name="date" value="{{ old('date', $today) }}" required
-                               class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none transition">
+                            class="w-full px-4 py-3 bg-slate-50/70 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none transition">
                     </div>
                 </div>
 
@@ -91,10 +91,10 @@
                 <div>
                     <label class="block font-extrabold text-slate-800 mb-2 text-xs">Status Kegiatan *</label>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        
+
                         <!-- Card WFO -->
                         <label class="flex items-center p-3 rounded-2xl border cursor-pointer transition select-none"
-                               :class="statusKegiatan === 'WFO' ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600' : 'bg-white border-slate-200 hover:bg-slate-50'">
+                            :class="statusKegiatan === 'WFO' ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600' : 'bg-white border-slate-200 hover:bg-slate-50'">
                             <input type="radio" name="work_location" value="WFO" checked x-model="statusKegiatan" class="text-blue-600 focus:ring-blue-600 mr-2.5">
                             <div class="flex items-center space-x-2">
                                 <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm shrink-0">
@@ -109,7 +109,7 @@
 
                         <!-- Card WFH -->
                         <label class="flex items-center p-3 rounded-2xl border cursor-pointer transition select-none"
-                               :class="statusKegiatan === 'WFH' ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600' : 'bg-white border-slate-200 hover:bg-slate-50'">
+                            :class="statusKegiatan === 'WFH' ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600' : 'bg-white border-slate-200 hover:bg-slate-50'">
                             <input type="radio" name="work_location" value="WFH" x-model="statusKegiatan" class="text-blue-600 focus:ring-blue-600 mr-2.5">
                             <div class="flex items-center space-x-2">
                                 <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm shrink-0">
@@ -124,7 +124,7 @@
 
                         <!-- Card Izin -->
                         <label class="flex items-center p-3 rounded-2xl border cursor-pointer transition select-none"
-                               :class="statusKegiatan === 'Leave' ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600' : 'bg-white border-slate-200 hover:bg-slate-50'">
+                            :class="statusKegiatan === 'Leave' ? 'bg-blue-50/50 border-blue-600 ring-1 ring-blue-600' : 'bg-white border-slate-200 hover:bg-slate-50'">
                             <input type="radio" name="work_location" value="Leave" x-model="statusKegiatan" class="text-blue-600 focus:ring-blue-600 mr-2.5">
                             <div class="flex items-center space-x-2">
                                 <div class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm shrink-0">
@@ -149,8 +149,8 @@
                 </div>
                 <p class="text-[11px] text-slate-400 font-medium">Jelaskan secara rinci tugas yang dikerjakan, rapat yang diikuti, kendala, atau pencapaian Anda hari ini.</p>
                 <textarea name="activity_description" rows="4" required
-                          placeholder="Contoh: Melakukan integrasi API webhook untuk tracking kontainer kapal menggunakan Laravel 12 dan Redis queue..."
-                          class="w-full p-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none leading-relaxed transition">{{ old('activity_description') }}</textarea>
+                    placeholder="Contoh: Melakukan integrasi API webhook untuk tracking kontainer kapal menggunakan Laravel 12 dan Redis queue..."
+                    class="w-full p-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none leading-relaxed transition">{{ old('activity_description') }}</textarea>
             </div>
 
             <!-- Row 3: Catatan / Pembelajaran Tambahan -->
@@ -158,20 +158,20 @@
                 <label class="block font-extrabold text-slate-800 text-xs">Catatan / Pembelajaran Tambahan (Opsional)</label>
                 <p class="text-[11px] text-slate-400 font-medium">Tuliskan hal baru yang dipelajari, insight, atau rencana untuk besok.</p>
                 <textarea name="notes" rows="3"
-                          placeholder="Contoh: Mempelajari cara menggunakan Redis queue untuk meningkatkan performa aplikasi..."
-                          class="w-full p-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none leading-relaxed transition">{{ old('notes') }}</textarea>
+                    placeholder="Contoh: Mempelajari cara menggunakan Redis queue untuk meningkatkan performa aplikasi..."
+                    class="w-full p-4 bg-slate-50/50 border border-slate-200 rounded-2xl text-xs font-medium focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none leading-relaxed transition">{{ old('notes') }}</textarea>
             </div>
 
             <!-- Row 4: Lampiran Berkas Drag & Drop Box -->
             <div class="space-y-1.5">
                 <label class="block font-extrabold text-slate-800 text-xs">Lampiran Berkas / Bukti Kegiatan (Opsional)</label>
                 <p class="text-[11px] text-slate-400 font-medium">Upload dokumen, screenshot, atau file pendukung lainnya.</p>
-                
+
                 <div class="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center bg-slate-50/30 hover:bg-slate-50 transition relative">
                     <input type="file" name="attachment" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                           @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''"
-                           class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                    
+                        @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''"
+                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
+
                     <div class="space-y-2">
                         <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg mx-auto">
                             <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -192,13 +192,13 @@
             <!-- Row 5: Action Buttons matching screenshot -->
             <div class="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
                 <button type="submit" name="action" value="draft"
-                        class="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 font-extrabold rounded-xl text-xs transition border border-slate-200 shadow-2xs flex items-center space-x-1.5">
+                    class="px-5 py-2.5 bg-white hover:bg-slate-100 text-slate-700 font-extrabold rounded-xl text-xs transition border border-slate-200 shadow-2xs flex items-center space-x-1.5">
                     <i class="fa-regular fa-bookmark"></i>
                     <span>Simpan Draft</span>
                 </button>
 
                 <button type="submit" name="action" value="submit"
-                        class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs transition shadow-sm flex items-center space-x-2 active:scale-98">
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs transition shadow-sm flex items-center space-x-2 active:scale-98">
                     <i class="fa-solid fa-paper-plane text-xs"></i>
                     <span>Kirim Logbook</span>
                 </button>

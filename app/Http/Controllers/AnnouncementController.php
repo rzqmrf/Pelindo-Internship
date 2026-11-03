@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Announcement;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,12 +29,14 @@ class AnnouncementController extends Controller
             'category' => 'required|string|in:info,important,event',
         ]);
 
-        Announcement::create([
+        $announcement = Announcement::create([
             'created_by' => Auth::id(),
             'title' => $request->title,
             'content' => $request->content,
             'category' => $request->category,
         ]);
+
+        AuditLogger::record('announcement.create', 'announcements', "Admin HR menerbitkan pengumuman: {$announcement->title}.", $announcement);
 
         // Send a notification to all interns and supervisors!
         $recipients = \App\Models\User::whereIn('role', ['intern', 'supervisor'])->get();
@@ -54,7 +57,10 @@ class AnnouncementController extends Controller
     public function destroy($id)
     {
         $announcement = Announcement::findOrFail($id);
+        $title = $announcement->title;
         $announcement->delete();
+
+        AuditLogger::record('announcement.delete', 'announcements', "Admin HR menghapus pengumuman: {$title}.");
 
         return redirect()->route('admin.announcements.index')->with('success', 'Pengumuman berhasil dihapus.');
     }

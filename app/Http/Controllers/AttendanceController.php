@@ -96,10 +96,10 @@ class AttendanceController extends Controller
         // Validasi QR Token jika metode yang dipilih adalah QR Code
         if ($checkInMethod === 'qr_code') {
             $expectedToken = $this->attendanceService->getDailyQrToken($today);
-            $inputToken = strtoupper(trim($request->qr_token));
+            $inputToken = strtoupper(trim((string) $request->qr_token));
 
-            if ($inputToken !== $expectedToken) {
-                return back()->with('error', "Kode QR / Token Presensi Kantor tidak valid. Token hari ini: {$expectedToken}");
+            if ($inputToken === '' || $inputToken !== $expectedToken) {
+                return back()->with('error', 'Kode QR / Token Presensi Kantor tidak sesuai atau sudah kedaluwarsa. Silakan pindai ulang QR Code resmi di layar resepsionis kantor.');
             }
             $qrTokenVerified = $inputToken;
         }
@@ -107,14 +107,26 @@ class AttendanceController extends Controller
         $lat = $request->latitude;
         $lng = $request->longitude;
         $distance = null;
+        $maxAllowedMeters = $this->attendanceService->getMaxAllowedDistance();
 
-        if ($lat && $lng) {
-            $distance = $this->attendanceService->calculateDistance((float)$lat, (float)$lng);
+        if ($lat !== null && $lng !== null && $lat !== '' && $lng !== '') {
+            $distance = $this->attendanceService->calculateDistance((float) $lat, (float) $lng);
         }
 
-        // Tentukan status terlambat jika check in setelah 08:30
+        if ($request->work_location === 'WFO' && $checkInMethod === 'geofence') {
+            if ($distance === null) {
+                return back()->with('error', 'Koordinat GPS belum terdeteksi untuk presensi WFO. Aktifkan izin lokasi browser atau gunakan metode Scan QR Kantor.');
+            }
+            if ($distance > $maxAllowedMeters) {
+                return back()->with('error', "Lokasi Anda berjarak {$distance} meter dari titik kantor (batas toleransi WFO: {$maxAllowedMeters} meter). Gunakan Scan QR Kantor jika berada di dalam gedung.");
+            }
+        }
+
+        // Tentukan status terlambat berdasarkan jam batas sistem
         $status = 'present';
-        $lateCutoff = Carbon::today()->setTime(8, 30, 0);
+        $cutoffStr = $this->attendanceService->getLateCutoffTime();
+        [$cutHour, $cutMin] = array_map('intval', explode(':', $cutoffStr));
+        $lateCutoff = Carbon::today()->setTime($cutHour, $cutMin, 0);
         if ($now->gt($lateCutoff)) {
             $status = 'late';
         }
@@ -157,7 +169,7 @@ class AttendanceController extends Controller
 
         $msg = "Check-in berhasil tercatat via " . ($checkInMethod === 'qr_code' ? 'Scan QR Code Kantor' : 'Geofencing GPS') . " pada pukul " . $now->format('H:i:s') . " ({$request->work_location}).";
         if ($status === 'late') {
-            $msg .= " Status: Terlambat (lewat 08:30 WIB).";
+            $msg .= " Status: Terlambat (lewat {$cutoffStr} WIB).";
         }
 
         return back()->with('success', $msg);

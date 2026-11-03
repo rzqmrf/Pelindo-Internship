@@ -9,6 +9,7 @@ use App\Models\Attendance;
 use App\Models\AllowanceClaim;
 use App\Models\LeaveRequest;
 use App\Models\Notification;
+use App\Models\SystemSetting;
 use Carbon\Carbon;
 
 class SendInternshipReminders extends Command
@@ -33,6 +34,12 @@ class SendInternshipReminders extends Command
     public function handle(): int
     {
         Carbon::setLocale('id');
+        if (SystemSetting::getBool('maintenance_mode') && !$this->option('force')) {
+            $this->warn('Mode Pemeliharaan sedang aktif. Pengiriman pengingat harian dilewati.');
+
+            return Command::SUCCESS;
+        }
+
         $today = Carbon::today();
         $isWeekday = !$today->isWeekend() || $this->option('force');
 

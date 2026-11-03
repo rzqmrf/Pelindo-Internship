@@ -9,6 +9,7 @@ use App\Models\SupervisorProfile;
 use App\Models\DailyActivity;
 use App\Models\Attendance;
 use App\Models\AllowanceClaim;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -253,6 +254,8 @@ class AdminController extends Controller
             'status' => 'active',
         ]);
 
+        AuditLogger::record('intern.create', 'users', "Admin HR menambahkan peserta magang baru: {$user->name} ({$user->email}).", $user);
+
         return redirect()->route('admin.interns.index')->with('success', 'Peserta magang baru berhasil ditambahkan.');
     }
 
@@ -310,6 +313,8 @@ class AdminController extends Controller
             'status' => $request->status,
         ]);
 
+        AuditLogger::record('intern.update', 'users', "Admin HR memperbarui data peserta magang: {$user->name}.", $user);
+
         return redirect()->route('admin.interns.index')->with('success', 'Data peserta magang berhasil diperbarui.');
     }
 
@@ -317,11 +322,14 @@ class AdminController extends Controller
     {
         $intern = InternProfile::findOrFail($id);
         $user = $intern->user;
+        $internName = $user?->name ?? "ID #{$id}";
         if ($user) {
             $user->delete(); // Cascades intern_profile and daily_activities
         } else {
             $intern->delete();
         }
+
+        AuditLogger::record('intern.delete', 'users', "Admin HR menghapus akun peserta magang: {$internName}.");
 
         return redirect()->back()->with('success', 'Peserta magang berhasil dihapus.');
     }
@@ -388,6 +396,8 @@ class AdminController extends Controller
             'phone' => $request->phone,
         ]);
 
+        AuditLogger::record('supervisor.create', 'users', "Admin HR menambahkan pembimbing baru: {$user->name} ({$user->email}).", $user);
+
         return redirect()->back()->with('success', 'Pembimbing baru berhasil ditambahkan.');
     }
 
@@ -422,6 +432,8 @@ class AdminController extends Controller
             'phone' => $request->phone,
         ]);
 
+        AuditLogger::record('supervisor.update', 'users', "Admin HR memperbarui data pembimbing: {$user->name}.", $user);
+
         return redirect()->back()->with('success', 'Data pembimbing berhasil diperbarui.');
     }
 
@@ -429,11 +441,14 @@ class AdminController extends Controller
     {
         $spvProfile = SupervisorProfile::findOrFail($id);
         $user = $spvProfile->user;
+        $spvName = $user?->name ?? "ID #{$id}";
         if ($user) {
             $user->delete();
         } else {
             $spvProfile->delete();
         }
+
+        AuditLogger::record('supervisor.delete', 'users', "Admin HR menghapus akun pembimbing: {$spvName}.");
 
         return redirect()->back()->with('success', 'Pembimbing berhasil dihapus.');
     }
@@ -557,6 +572,7 @@ class AdminController extends Controller
                 'Bulan Rekap',
                 'Hadir (WFO)',
                 'Hadir (WFH)',
+                'Hadir (WFA)',
                 'Izin / Sakit (Leave)',
                 'Total Hadir',
                 'Total Hari Kerja Terisi',
@@ -566,6 +582,7 @@ class AdminController extends Controller
             foreach ($interns as $intern) {
                 $wfoCount = 0;
                 $wfhCount = 0;
+                $wfaCount = 0;
                 $leaveCount = 0;
                 $totalLogbookFilled = 0;
 
@@ -578,10 +595,11 @@ class AdminController extends Controller
                     $totalLogbookFilled = $activities->count();
                     $wfoCount = $activities->where('work_location', 'WFO')->count();
                     $wfhCount = $activities->where('work_location', 'WFH')->count();
+                    $wfaCount = $activities->where('work_location', 'WFA')->count();
                     $leaveCount = $activities->where('work_location', 'Leave')->count();
                 }
 
-                $totalPresence = $wfoCount + $wfhCount + $leaveCount;
+                $totalPresence = $wfoCount + $wfhCount + $wfaCount + $leaveCount;
 
                 fputcsv($file, [
                     $no++,
@@ -593,6 +611,7 @@ class AdminController extends Controller
                     $parsedMonth->isoFormat('MMMM YYYY'),
                     $wfoCount,
                     $wfhCount,
+                    $wfaCount,
                     $leaveCount,
                     $totalPresence,
                     $totalLogbookFilled,

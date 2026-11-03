@@ -3,11 +3,10 @@
 @section('content')
 <div class="space-y-6 max-w-6xl mx-auto">
     <!-- Centralized Page Header -->
-    <x-page-header 
-        title="Detail & Track Record Peserta Magang" 
-        subtitle="Profil lengkap biodata, divisi, pembimbing, riwayat presensi, dan klaim uang saku." 
-        icon="fa-solid fa-user-gear"
-    >
+    <x-page-header
+        title="Detail & Track Record Peserta Magang"
+        subtitle="Profil lengkap biodata, divisi, pembimbing, riwayat presensi, dan klaim uang saku."
+        icon="fa-solid fa-user-gear">
         <x-slot:action>
             <div class="flex items-center gap-2">
                 <a href="{{ route('admin.interns.edit', $intern->id) }}" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl text-xs transition inline-flex items-center gap-2">
@@ -74,7 +73,12 @@
                 </div>
                 <div class="flex justify-between py-1">
                     <span class="text-slate-400 font-medium">Periode Magang:</span>
-                    <span class="font-bold text-slate-700 text-right font-mono">{{ $intern->start_date?->format('d/m/Y') }} s.d {{ $intern->end_date?->format('d/m/Y') }}</span>
+                    <div class="text-right">
+                        <span class="font-bold text-slate-700 block font-mono">{{ $intern->start_date?->format('d/m/Y') }} s.d {{ $intern->end_date?->format('d/m/Y') }}</span>
+                        @if($intern->start_date && $intern->end_date)
+                        <span class="text-[11px] font-extrabold text-[#005B9C]">({{ $intern->start_date->diffInDays($intern->end_date) + 1 }} Hari)</span>
+                        @endif
+                    </div>
                 </div>
             </div>
 
@@ -106,37 +110,37 @@
                 </h3>
 
                 @if($attendances->isEmpty())
-                    <p class="text-xs text-slate-400 py-4 text-center">Belum ada catatan presensi.</p>
+                <p class="text-xs text-slate-400 py-4 text-center">Belum ada catatan presensi.</p>
                 @else
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-xs text-left">
-                            <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] border-b border-slate-100">
-                                <tr>
-                                    <th class="p-3">Tanggal</th>
-                                    <th class="p-3">Mode</th>
-                                    <th class="p-3">Check-In</th>
-                                    <th class="p-3">Check-Out</th>
-                                    <th class="p-3">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
-                                @foreach($attendances as $att)
-                                    @php $badge = App\Helpers\StatusHelper::attendanceBadge($att->status); @endphp
-                                    <tr>
-                                        <td class="p-3 font-bold">{{ $att->date->format('d M Y') }}</td>
-                                        <td class="p-3 font-semibold">{{ $att->work_location }}</td>
-                                        <td class="p-3 font-mono">{{ $att->check_in_time ? substr($att->check_in_time, 0, 5) : '-' }}</td>
-                                        <td class="p-3 font-mono">{{ $att->check_out_time ? substr($att->check_out_time, 0, 5) : '-' }}</td>
-                                        <td class="p-3">
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $badge['class'] }}">
-                                                {{ $badge['label'] }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left">
+                        <thead class="bg-slate-50 text-slate-400 uppercase font-bold text-[10px] border-b border-slate-100">
+                            <tr>
+                                <th class="p-3">Tanggal</th>
+                                <th class="p-3">Mode</th>
+                                <th class="p-3">Check-In</th>
+                                <th class="p-3">Check-Out</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-700">
+                            @foreach($attendances as $att)
+                            @php $badge = App\Helpers\StatusHelper::attendanceBadge($att->status); @endphp
+                            <tr>
+                                <td class="p-3 font-bold">{{ $att->date->format('d M Y') }}</td>
+                                <td class="p-3 font-semibold">{{ $att->work_location }}</td>
+                                <td class="p-3 font-mono">{{ $att->check_in_time ? substr($att->check_in_time, 0, 5) : '-' }}</td>
+                                <td class="p-3 font-mono">{{ $att->check_out_time ? substr($att->check_out_time, 0, 5) : '-' }}</td>
+                                <td class="p-3">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $badge['class'] }}">
+                                        {{ $badge['label'] }}
+                                    </span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
                 @endif
             </div>
 
@@ -148,21 +152,21 @@
                 </h3>
 
                 @if($activities->isEmpty())
-                    <p class="text-xs text-slate-400 py-4 text-center">Belum ada catatan logbook harian.</p>
+                <p class="text-xs text-slate-400 py-4 text-center">Belum ada catatan logbook harian.</p>
                 @else
-                    <div class="space-y-3">
-                        @foreach($activities as $act)
-                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-bold text-slate-800">{{ $act->date->format('d M Y') }} ({{ $act->work_location }})</span>
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">
-                                        {{ strtoupper($act->status) }}
-                                    </span>
-                                </div>
-                                <p class="text-slate-600 leading-relaxed">{{ Str::limit($act->activity_description, 120) }}</p>
-                            </div>
-                        @endforeach
+                <div class="space-y-3">
+                    @foreach($activities as $act)
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-800">{{ $act->date->format('d M Y') }} ({{ $act->work_location }})</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700">
+                                {{ strtoupper($act->status) }}
+                            </span>
+                        </div>
+                        <p class="text-slate-600 leading-relaxed">{{ Str::limit($act->activity_description, 120) }}</p>
                     </div>
+                    @endforeach
+                </div>
                 @endif
             </div>
         </div>

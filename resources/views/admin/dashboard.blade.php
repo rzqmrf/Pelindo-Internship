@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="space-y-6">
-    
+
     <!-- Welcome Banner Card -->
     <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -14,7 +14,7 @@
             </h1>
             <p class="text-xs font-semibold text-slate-400 mt-1">Monitor program magang, kelola peserta, pembimbing, dan laporan dengan mudah.</p>
         </div>
-        
+
         <div class="flex items-center gap-3 shrink-0">
             <a href="{{ route('admin.interns.index') }}" class="px-5 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs transition shadow-sm flex items-center gap-2">
                 <i class="fa-solid fa-user-plus text-xs"></i>
@@ -25,7 +25,7 @@
 
     <!-- 4 KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        
+
         <!-- Active Interns -->
         <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
             <div class="space-y-1">
@@ -89,7 +89,7 @@
 
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         <!-- Line Chart -->
         <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
             <div class="flex items-center justify-between">
@@ -97,14 +97,14 @@
                     <h3 class="font-black text-slate-800 text-sm">Tren Pengiriman Aktivitas ({{ $days }} Hari Terakhir)</h3>
                     <p class="text-xs font-semibold text-slate-400">Grafik jumlah logbook yang dikirim per hari</p>
                 </div>
-                
+
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="px-3.5 py-1.5 bg-slate-50 border border-slate-200/80 rounded-xl text-xs font-extrabold text-slate-600 flex items-center space-x-1.5 hover:bg-slate-100 transition">
                         <span>{{ $days }} Hari Terakhir</span>
                         <i class="fa-solid fa-chevron-down text-[9px] text-slate-400"></i>
                     </button>
-                    <div x-show="open" @click.outside="open = false" x-transition.origin.top.right 
-                         class="absolute right-0 mt-1 w-40 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 z-20 text-xs text-slate-700 font-semibold" x-cloak>
+                    <div x-show="open" @click.outside="open = false" x-transition.origin.top.right
+                        class="absolute right-0 mt-1 w-40 bg-white border border-slate-100 rounded-xl shadow-lg py-1.5 z-20 text-xs text-slate-700 font-semibold" x-cloak>
                         <a href="{{ route('admin.dashboard', ['days' => 7]) }}" class="block px-3 py-1.5 hover:bg-slate-50 @if($days == 7) font-bold text-[#0B63E5] bg-slate-50/50 @endif">7 Hari Terakhir</a>
                         <a href="{{ route('admin.dashboard', ['days' => 14]) }}" class="block px-3 py-1.5 hover:bg-slate-50 @if($days == 14) font-bold text-[#0B63E5] bg-slate-50/50 @endif">14 Hari Terakhir</a>
                         <a href="{{ route('admin.dashboard', ['days' => 30]) }}" class="block px-3 py-1.5 hover:bg-slate-50 @if($days == 30) font-bold text-[#0B63E5] bg-slate-50/50 @endif">30 Hari Terakhir</a>
@@ -134,11 +134,11 @@
             </div>
 
             @php
-                $totalReports = array_sum($statusCounts);
-                $pctApproved = $totalReports > 0 ? round(($statusCounts['Approved'] / $totalReports) * 100) : 0;
-                $pctPending = $totalReports > 0 ? round(($statusCounts['Pending'] / $totalReports) * 100) : 0;
-                $pctRevision = $totalReports > 0 ? round(($statusCounts['Revision'] / $totalReports) * 100) : 0;
-                $pctRejected = $totalReports > 0 ? round(($statusCounts['Rejected'] / $totalReports) * 100) : 0;
+            $totalReports = array_sum($statusCounts);
+            $pctApproved = $totalReports > 0 ? round(($statusCounts['Approved'] / $totalReports) * 100) : 0;
+            $pctPending = $totalReports > 0 ? round(($statusCounts['Pending'] / $totalReports) * 100) : 0;
+            $pctRevision = $totalReports > 0 ? round(($statusCounts['Revision'] / $totalReports) * 100) : 0;
+            $pctRejected = $totalReports > 0 ? round(($statusCounts['Rejected'] / $totalReports) * 100) : 0;
             @endphp
             <div class="grid grid-cols-2 gap-x-4 gap-y-3 text-[11px] font-bold text-slate-600 pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-between">
@@ -175,7 +175,7 @@
 
     <!-- Division Table Card (Full Width) -->
     @php
-        $sortedDivisions = collect($divisionsData)->sortByDesc('active_interns_count')->values();
+    $sortedDivisions = collect($divisionsData)->sortByDesc('active_interns_count')->values();
     @endphp
     <div x-data="{ showAllDivisions: false }" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-6">
         <div class="border-b border-slate-50 pb-4">
@@ -197,59 +197,59 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50 text-xs font-bold text-slate-700">
                     @foreach($sortedDivisions as $index => $div)
-                        @php
-                            // Mapping icons
-                            $iconClass = 'fa-solid fa-sitemap text-slate-600 bg-slate-50';
-                            if (Str::contains($div['name'], ['SDM', 'HR', 'Human Capital', 'Umum'])) {
-                                $iconClass = 'fa-solid fa-users text-blue-600 bg-blue-50';
-                            } elseif (Str::contains($div['name'], ['Teknologi', 'IT', 'Digitalisasi'])) {
-                                $iconClass = 'fa-solid fa-code text-emerald-600 bg-emerald-50';
-                            } elseif (Str::contains($div['name'], ['Keuangan', 'Fin', 'Perbendaharaan'])) {
-                                $iconClass = 'fa-solid fa-wallet text-indigo-600 bg-indigo-50';
-                            } elseif (Str::contains($div['name'], ['Operasional', 'Ops', 'Logistik'])) {
-                                $iconClass = 'fa-solid fa-gears text-orange-600 bg-orange-50';
-                            }
-                        @endphp
-                        <tr class="hover:bg-slate-50/50 transition" x-show="{{ $index }} < 4 || showAllDivisions" x-cloak>
-                            <td class="py-3.5 px-4 flex items-center space-x-3">
-                                <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs shrink-0 {{ explode(' ', $iconClass)[2] }}">
-                                    <i class="{{ implode(' ', array_slice(explode(' ', $iconClass), 0, 2)) }}"></i>
+                    @php
+                    // Mapping icons
+                    $iconClass = 'fa-solid fa-sitemap text-slate-600 bg-slate-50';
+                    if (Str::contains($div['name'], ['SDM', 'HR', 'Human Capital', 'Umum'])) {
+                    $iconClass = 'fa-solid fa-users text-blue-600 bg-blue-50';
+                    } elseif (Str::contains($div['name'], ['Teknologi', 'IT', 'Digitalisasi'])) {
+                    $iconClass = 'fa-solid fa-code text-emerald-600 bg-emerald-50';
+                    } elseif (Str::contains($div['name'], ['Keuangan', 'Fin', 'Perbendaharaan'])) {
+                    $iconClass = 'fa-solid fa-wallet text-indigo-600 bg-indigo-50';
+                    } elseif (Str::contains($div['name'], ['Operasional', 'Ops', 'Logistik'])) {
+                    $iconClass = 'fa-solid fa-gears text-orange-600 bg-orange-50';
+                    }
+                    @endphp
+                    <tr class="hover:bg-slate-50/50 transition" x-show="{{ $index }} < 4 || showAllDivisions" x-cloak>
+                        <td class="py-3.5 px-4 flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs shrink-0 {{ explode(' ', $iconClass)[2] }}">
+                                <i class="{{ implode(' ', array_slice(explode(' ', $iconClass), 0, 2)) }}"></i>
+                            </div>
+                            <span class="font-extrabold text-slate-800">
+                                {{ str_replace('Divisi ', '', $div['name']) }}
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['active_interns_count'] }} Peserta</td>
+                        <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['supervisors_count'] }} Pembimbing</td>
+                        <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['total_reports'] }} Laporan</td>
+                        <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['pending_reports'] }} Laporan</td>
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-slate-800 font-extrabold w-8 text-right">{{ $div['progress'] }}%</span>
+                                <div class="w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden shrink-0">
+                                    <div class="bg-[#0B63E5] h-1.5 rounded-full" style="width: {{ $div['progress'] }}%"></div>
                                 </div>
-                                <span class="font-extrabold text-slate-800">
-                                    {{ str_replace('Divisi ', '', $div['name']) }}
-                                </span>
-                            </td>
-                            <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['active_interns_count'] }} Peserta</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['supervisors_count'] }} Pembimbing</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['total_reports'] }} Laporan</td>
-                            <td class="py-3.5 px-4 text-slate-500 font-semibold">{{ $div['pending_reports'] }} Laporan</td>
-                            <td class="py-3.5 px-4">
-                                <div class="flex items-center space-x-3">
-                                    <span class="text-slate-800 font-extrabold w-8 text-right">{{ $div['progress'] }}%</span>
-                                    <div class="w-28 bg-slate-100 rounded-full h-1.5 overflow-hidden shrink-0">
-                                        <div class="bg-[#0B63E5] h-1.5 rounded-full" style="width: {{ $div['progress'] }}%"></div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                    </tr>
                     @endforeach
                 </tbody>
             </table>
         </div>
 
         @if($sortedDivisions->count() > 4)
-            <div class="flex justify-center pt-2">
-                <button @click="showAllDivisions = !showAllDivisions" class="px-5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-600 hover:text-slate-900 shadow-2xs hover:bg-slate-50 transition flex items-center space-x-1.5">
-                    <span x-text="showAllDivisions ? 'Sembunyikan' : 'Lihat Semua Divisi'">Lihat Semua Divisi</span>
-                    <i class="fa-solid text-[9px] transition-transform duration-200" :class="showAllDivisions ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-                </button>
-            </div>
+        <div class="flex justify-center pt-2">
+            <button @click="showAllDivisions = !showAllDivisions" class="px-5 py-2 bg-white border border-slate-200 rounded-2xl text-xs font-bold text-slate-600 hover:text-slate-900 shadow-2xs hover:bg-slate-50 transition flex items-center space-x-1.5">
+                <span x-text="showAllDivisions ? 'Sembunyikan' : 'Lihat Semua Divisi'">Lihat Semua Divisi</span>
+                <i class="fa-solid text-[9px] transition-transform duration-200" :class="showAllDivisions ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+        </div>
         @endif
     </div>
 
     <!-- Tables Row: Pending Approvals & Upcoming Internship End (Side-by-Side) -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         <!-- Pending Approvals Table -->
         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
             <div class="flex items-center justify-between border-b border-slate-50 pb-3">
@@ -272,27 +272,27 @@
                     </thead>
                     <tbody class="divide-y divide-slate-50 text-xs font-bold text-slate-700">
                         @forelse($pendingActivities as $act)
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="py-3 px-3">
-                                    <p class="font-extrabold text-slate-800">{{ $act->intern?->name }}</p>
-                                    <p class="text-[10px] text-slate-400 font-semibold">{{ $act->intern?->internProfile?->institution }}</p>
-                                </td>
-                                <td class="py-3 px-3 text-slate-500 font-semibold">
-                                    {{ $act->date->format('d/m/Y') }}
-                                </td>
-                                <td class="py-3 px-3">
-                                    <span class="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase {{ $act->work_location === 'WFO' ? 'bg-blue-50 text-blue-700' : ($act->work_location === 'WFH' ? 'bg-purple-50 text-purple-700' : 'bg-amber-50 text-amber-700') }}">
-                                        {{ $act->work_location }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-3 text-slate-500 font-semibold">
-                                    {{ $act->supervisor?->name ?? 'Belum Diplot' }}
-                                </td>
-                            </tr>
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-3 px-3">
+                                <p class="font-extrabold text-slate-800">{{ $act->intern?->name }}</p>
+                                <p class="text-[10px] text-slate-400 font-semibold">{{ $act->intern?->internProfile?->institution }}</p>
+                            </td>
+                            <td class="py-3 px-3 text-slate-500 font-semibold">
+                                {{ $act->date->format('d/m/Y') }}
+                            </td>
+                            <td class="py-3 px-3">
+                                <span class="px-2 py-0.5 rounded-md text-[9px] font-extrabold uppercase {{ $act->work_location === 'WFO' ? 'bg-blue-50 text-blue-700' : ($act->work_location === 'WFH' ? 'bg-purple-50 text-purple-700' : 'bg-amber-50 text-amber-700') }}">
+                                    {{ $act->work_location }}
+                                </span>
+                            </td>
+                            <td class="py-3 px-3 text-slate-500 font-semibold">
+                                {{ $act->supervisor?->name ?? 'Belum Diplot' }}
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="4" class="py-6 text-center text-slate-400 text-xs font-semibold">Tidak ada antrean pending saat ini.</td>
-                            </tr>
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-slate-400 text-xs font-semibold">Tidak ada antrean pending saat ini.</td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -321,30 +321,30 @@
                     </thead>
                     <tbody class="divide-y divide-slate-50 text-xs font-bold text-slate-700">
                         @forelse($upcomingEndingInterns as $profile)
-                            @php
-                                $daysLeft = \Carbon\Carbon::today()->diffInDays($profile->end_date, false);
-                            @endphp
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="py-3 px-3">
-                                    <p class="font-extrabold text-slate-800">{{ $profile->user?->name }}</p>
-                                    <p class="text-[10px] text-slate-400 font-semibold">{{ $profile->institution }}</p>
-                                </td>
-                                <td class="py-3 px-3 text-slate-500 font-semibold">
-                                    {{ $profile->division?->code ?? '-' }}
-                                </td>
-                                <td class="py-3 px-3 text-slate-500 font-semibold">
-                                    {{ $profile->end_date->format('d M Y') }}
-                                </td>
-                                <td class="py-3 px-3">
-                                    <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold {{ $daysLeft <= 7 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800' }}">
-                                        {{ $daysLeft }} Hari
-                                    </span>
-                                </td>
-                            </tr>
+                        @php
+                        $daysLeft = \Carbon\Carbon::today()->diffInDays($profile->end_date, false);
+                        @endphp
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-3 px-3">
+                                <p class="font-extrabold text-slate-800">{{ $profile->user?->name }}</p>
+                                <p class="text-[10px] text-slate-400 font-semibold">{{ $profile->institution }}</p>
+                            </td>
+                            <td class="py-3 px-3 text-slate-500 font-semibold">
+                                {{ $profile->division?->code ?? '-' }}
+                            </td>
+                            <td class="py-3 px-3 text-slate-500 font-semibold">
+                                {{ $profile->end_date->format('d M Y') }}
+                            </td>
+                            <td class="py-3 px-3">
+                                <span class="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold {{ $daysLeft <= 7 ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800' }}">
+                                    {{ $daysLeft }} Hari
+                                </span>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="4" class="py-6 text-center text-slate-400 text-xs font-semibold">Tidak ada peserta yang selesai magang dalam 30 hari ini.</td>
-                            </tr>
+                        <tr>
+                            <td colspan="4" class="py-6 text-center text-slate-400 text-xs font-semibold">Tidak ada peserta yang selesai magang dalam 30 hari ini.</td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
@@ -366,10 +366,14 @@
         new Chart(ctxTrend, {
             type: 'line',
             data: {
-                labels: {!! json_encode($trendLabels) !!},
+                labels: {
+                    !!json_encode($trendLabels) !!
+                },
                 datasets: [{
                     label: 'Jumlah Laporan Masuk',
-                    data: {!! json_encode($trendData) !!},
+                    data: {
+                        !!json_encode($trendData) !!
+                    },
                     borderColor: '#0B63E5',
                     backgroundColor: trendGradient,
                     fill: true,
@@ -385,12 +389,16 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { display: false } 
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                scales: { 
+                scales: {
                     x: {
-                        grid: { display: false },
+                        grid: {
+                            display: false
+                        },
                         ticks: {
                             font: {
                                 size: 10,
@@ -400,9 +408,9 @@
                             color: '#94a3b8'
                         }
                     },
-                    y: { 
-                        beginAtZero: true, 
-                        ticks: { 
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
                             precision: 0,
                             font: {
                                 size: 10,
@@ -415,7 +423,7 @@
                             color: '#f8fafc',
                             drawBorder: false
                         }
-                    } 
+                    }
                 }
             }
         });
@@ -427,11 +435,26 @@
             data: {
                 labels: ['Approved', 'Pending', 'Revision', 'Rejected'],
                 datasets: [{
-                    data: [
-                        {{ $statusCounts['Approved'] }},
-                        {{ $statusCounts['Pending'] }},
-                        {{ $statusCounts['Revision'] }},
-                        {{ $statusCounts['Rejected'] }}
+                    data: [{
+                            {
+                                $statusCounts['Approved']
+                            }
+                        },
+                        {
+                            {
+                                $statusCounts['Pending']
+                            }
+                        },
+                        {
+                            {
+                                $statusCounts['Revision']
+                            }
+                        },
+                        {
+                            {
+                                $statusCounts['Rejected']
+                            }
+                        }
                     ],
                     backgroundColor: ['#10B981', '#F59E0B', '#3B82F6', '#EF4444'],
                     borderWidth: 3,
@@ -442,7 +465,11 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
                 cutout: '76%'
             }
         });

@@ -28,10 +28,13 @@ class ReportExportController extends Controller
         Carbon::setLocale('id');
 
         $user = Auth::user();
-        $internId = $request->intern_id ?? ($user->isIntern() ? $user->id : null);
-
-        if (!$internId && $user->isIntern()) {
+        if ($user->isIntern()) {
+            if ($request->filled('intern_id') && (int) $request->intern_id !== $user->id) {
+                abort(403, 'Anda hanya dapat mengunduh laporan magang milik Anda sendiri.');
+            }
             $internId = $user->id;
+        } else {
+            $internId = $request->intern_id;
         }
 
         $internUser = User::with(['internProfile.division', 'internProfile.supervisor.supervisorProfile'])->findOrFail($internId);
@@ -164,9 +167,15 @@ class ReportExportController extends Controller
 
     public function exportExcel(Request $request)
     {
+        $user = Auth::user();
         $query = DailyActivity::with(['intern.internProfile.division', 'supervisor']);
 
-        if ($request->filled('intern_id')) {
+        if ($user->isIntern()) {
+            if ($request->filled('intern_id') && (int) $request->intern_id !== $user->id) {
+                abort(403, 'Anda hanya dapat mengekspor laporan milik Anda sendiri.');
+            }
+            $query->where('intern_id', $user->id);
+        } elseif ($request->filled('intern_id')) {
             $query->where('intern_id', $request->intern_id);
         }
 

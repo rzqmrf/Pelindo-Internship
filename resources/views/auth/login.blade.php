@@ -102,7 +102,9 @@
         </div>
 
         <!-- Right Column (6/12 cols): Login Form -->
-        <div class="lg:col-span-6 bg-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between min-h-screen" x-data="{ showPassword: false }">
+        <div class="lg:col-span-6 bg-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between min-h-screen"
+             x-data="{ showPassword: false, forgotOpen: false }"
+             @keydown.escape.window="forgotOpen = false">
 
             <!-- Top Right Action Link -->
             <div class="flex justify-end">
@@ -123,6 +125,33 @@
                     </h2>
                     <p class="text-xs sm:text-sm font-semibold text-slate-500">Silakan masuk menggunakan akun terdaftar Anda.</p>
                 </div>
+
+                <!-- Maintenance / System Notice on Login -->
+                @if(!empty($globalMaintenanceState['enabled']))
+                <div class="bg-amber-50 border border-amber-300 text-amber-950 p-4 rounded-2xl text-xs space-y-1.5">
+                    <div class="flex items-center space-x-2 font-extrabold text-amber-900">
+                        <i class="fa-solid fa-screwdriver-wrench text-sm"></i>
+                        <span>{{ $globalMaintenanceState['title'] ?: 'Pemeliharaan Sistem Aktif' }}</span>
+                    </div>
+                    <p class="text-[11px] font-semibold leading-relaxed text-amber-900">
+                        {{ $globalMaintenanceState['message'] }}
+                    </p>
+                    <p class="text-[11px] font-bold text-amber-800 pt-0.5">
+                        Saat ini hanya akun Pengembang Sistem (Superadmin) yang dapat masuk.
+                    </p>
+                </div>
+                @elseif(!empty($globalSystemBanner['enabled']) && !empty($globalSystemBanner['message']))
+                <div class="bg-blue-50 border border-blue-200 text-slate-900 p-4 rounded-2xl text-xs space-y-1">
+                    <div class="flex items-center space-x-2 font-extrabold text-[#005B9C]">
+                        <i class="fa-solid fa-circle-info text-sm"></i>
+                        <span>{{ $globalSystemBanner['title'] ?: 'Pemberitahuan Sistem' }}</span>
+                    </div>
+                    <p class="text-[11px] font-semibold leading-relaxed text-slate-700">{{ $globalSystemBanner['message'] }}</p>
+                    @if(!empty($globalSystemBanner['schedule_at']))
+                        <p class="text-[11px] font-bold text-slate-800">Jadwal: {{ $globalSystemBanner['schedule_at'] }}</p>
+                    @endif
+                </div>
+                @endif
 
                 <!-- Error Alert Box -->
                 @if ($errors->any())
@@ -177,7 +206,9 @@
                             <input type="checkbox" name="remember" class="rounded border-slate-300 text-[#0B63E5] focus:ring-[#0B63E5] w-4 h-4">
                             <span>Ingat Saya</span>
                         </label>
-                        <a href="#" onclick="alert('Silakan hubungi HR Admin Pelindo untuk reset password.')" class="text-[#0B63E5] hover:underline font-bold">Lupa Password?</a>
+                        <button type="button" @click="forgotOpen = true" class="text-[#0B63E5] hover:underline font-bold">
+                            Lupa Password?
+                        </button>
                     </div>
 
                     <!-- Submit Button -->
@@ -196,7 +227,12 @@
                         <div class="flex-grow border-t border-slate-200"></div>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-3">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <button type="button" onclick="fillLogin('superadmin@pelindo.co.id', 'password123')"
+                            class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-900 rounded-xl text-center text-xs transition font-extrabold text-white shadow-2xs flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-terminal text-sky-300"></i>
+                            <span>Superadmin</span>
+                        </button>
                         <button type="button" onclick="fillLogin('admin@pelindo.co.id', 'password123')"
                             class="p-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-center text-xs transition font-extrabold text-slate-700 shadow-2xs flex items-center justify-center space-x-1.5">
                             <i class="fa-solid fa-user-shield text-[#0B63E5]"></i>
@@ -218,6 +254,30 @@
             </div>
 
             <div></div>
+
+            <!-- Modal Panduan Reset Kata Sandi -->
+            <div x-show="forgotOpen" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+                <div @click.outside="forgotOpen = false" class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 border border-slate-200 shadow-xl space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <h3 class="text-base font-black text-[#0F2A4A]">Bantuan Reset Kata Sandi</h3>
+                        <button type="button" @click="forgotOpen = false" class="text-slate-400 hover:text-slate-700 p-1" aria-label="Tutup dialog">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs font-medium text-slate-600 leading-relaxed">
+                        Demi keamanan akun internal PT Pelabuhan Indonesia (Persero), pengaturan ulang kata sandi dilakukan secara terverifikasi oleh <strong>Admin HR Pelindo</strong> atau <strong>Tim IT Helpdesk</strong>.
+                    </p>
+                    <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                        <p class="font-bold text-slate-800">Kontak Layanan Bantuan:</p>
+                        <a href="mailto:{{ $globalMaintenanceState['contact'] ?? 'it.helpdesk@pelindo.co.id' }}" class="text-[#0B63E5] font-extrabold hover:underline block">
+                            {{ $globalMaintenanceState['contact'] ?? 'it.helpdesk@pelindo.co.id' }}
+                        </a>
+                    </div>
+                    <button type="button" @click="forgotOpen = false" class="w-full py-2.5 rounded-xl bg-[#0F2A4A] hover:bg-slate-800 text-white font-extrabold text-xs transition">
+                        Mengerti
+                    </button>
+                </div>
+            </div>
         </div>
 
     </div>

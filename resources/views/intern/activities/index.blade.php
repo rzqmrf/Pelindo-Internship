@@ -6,11 +6,10 @@
 <div class="space-y-6" x-data="{ detailModalOpen: false, selectedActivity: null }">
 
     <!-- Centralized Page Header -->
-    <x-page-header 
-        title="Riwayat & Status Approval Aktivitas Harian" 
-        subtitle="Daftar lengkap laporan harian yang telah dikirim beserta catatan dari pembimbing lapangan." 
-        icon="fa-regular fa-file-lines"
-    >
+    <x-page-header
+        title="Riwayat & Status Approval Aktivitas Harian"
+        subtitle="Daftar lengkap laporan harian yang telah dikirim beserta catatan dari pembimbing lapangan."
+        icon="fa-regular fa-file-lines">
         <x-slot:action>
             <a href="{{ route('intern.activities.create') }}" class="px-4 py-2.5 bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold rounded-2xl text-xs transition shadow-xs flex items-center space-x-2">
                 <i class="fa-solid fa-plus text-xs"></i>
@@ -54,7 +53,7 @@
             <div>
                 <label class="block font-bold text-slate-700 text-[11px] mb-1.5">Tanggal</label>
                 <input type="month" name="month" value="{{ request('month') }}"
-                       class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-600">
+                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-blue-600">
             </div>
 
             <!-- Filter Action Buttons right -->
@@ -87,96 +86,96 @@
                 </thead>
                 <tbody class="divide-y divide-slate-100 text-xs">
                     @forelse($activities as $act)
-                        <tr class="hover:bg-slate-50/60 transition">
-                            <!-- Tanggal Column with Dot -->
-                            <td class="py-4 px-5 font-extrabold text-slate-800 whitespace-nowrap">
-                                <div class="flex items-center space-x-2.5">
-                                    <span class="w-2 h-2 rounded-full {{ $act->status === 'approved' ? 'bg-emerald-500' : ($act->status === 'pending' ? 'bg-amber-500' : ($act->status === 'revision' ? 'bg-blue-500' : 'bg-rose-500')) }}"></span>
-                                    <div>
-                                        <p class="font-extrabold text-slate-800 text-xs">{{ $act->date->format('d M Y') }}</p>
-                                        <p class="text-[10px] text-slate-400 font-semibold">{{ $act->date->isoFormat('dddd') }}</p>
-                                    </div>
+                    <tr class="hover:bg-slate-50/60 transition">
+                        <!-- Tanggal Column with Dot -->
+                        <td class="py-4 px-5 font-extrabold text-slate-800 whitespace-nowrap">
+                            <div class="flex items-center space-x-2.5">
+                                <span class="w-2 h-2 rounded-full {{ $act->status === 'approved' ? 'bg-emerald-500' : ($act->status === 'pending' ? 'bg-amber-500' : ($act->status === 'revision' ? 'bg-blue-500' : 'bg-rose-500')) }}"></span>
+                                <div>
+                                    <p class="font-extrabold text-slate-800 text-xs">{{ $act->date->format('d M Y') }}</p>
+                                    <p class="text-[10px] text-slate-400 font-semibold">{{ $act->date->isoFormat('dddd') }}</p>
                                 </div>
-                            </td>
+                            </div>
+                        </td>
 
-                            <!-- Lokasi Column -->
-                            <td class="py-4 px-5 whitespace-nowrap">
-                                <span class="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase {{ $act->work_location === 'WFO' ? 'bg-blue-100/90 text-blue-800' : ($act->work_location === 'WFH' ? 'bg-purple-100/90 text-purple-800' : 'bg-amber-100/90 text-amber-800') }}">
-                                    {{ $act->work_location }}
-                                </span>
-                            </td>
+                        <!-- Lokasi Column -->
+                        <td class="py-4 px-5 whitespace-nowrap">
+                            <span class="px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase {{ $act->work_location === 'WFO' ? 'bg-blue-100/90 text-blue-800' : ($act->work_location === 'WFH' ? 'bg-purple-100/90 text-purple-800' : 'bg-amber-100/90 text-amber-800') }}">
+                                {{ $act->work_location }}
+                            </span>
+                        </td>
 
-                            <!-- Deskripsi Aktivitas Column -->
-                            <td class="py-4 px-5 max-w-sm">
-                                <p class="text-slate-700 font-semibold leading-relaxed line-clamp-2">{{ $act->activity_description }}</p>
-                            </td>
+                        <!-- Deskripsi Aktivitas Column -->
+                        <td class="py-4 px-5 max-w-sm">
+                            <p class="text-slate-700 font-semibold leading-relaxed line-clamp-2">{{ $act->activity_description }}</p>
+                        </td>
 
-                            <!-- Status Approval Column -->
-                            <td class="py-4 px-5 whitespace-nowrap">
-                                @php
-                                    $badge = match($act->status) {
-                                        'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                        'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                        'revision' => 'bg-blue-50 text-blue-700 border-blue-200',
-                                        'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
-                                        default => 'bg-slate-100 text-slate-600 border-slate-200',
-                                    };
-                                    $icon = match($act->status) {
-                                        'approved' => 'fa-check',
-                                        'pending' => 'fa-clock',
-                                        'revision' => 'fa-rotate',
-                                        'rejected' => 'fa-xmark',
-                                        default => 'fa-bookmark',
-                                    };
-                                @endphp
-                                <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold border uppercase tracking-wider {{ $badge }}">
-                                    <i class="fa-solid {{ $icon }} text-[9px]"></i>
-                                    <span>{{ strtoupper($act->status) }}</span>
-                                </span>
-                            </td>
+                        <!-- Status Approval Column -->
+                        <td class="py-4 px-5 whitespace-nowrap">
+                            @php
+                            $badge = match($act->status) {
+                            'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                            'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
+                            'revision' => 'bg-blue-50 text-blue-700 border-blue-200',
+                            'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
+                            default => 'bg-slate-100 text-slate-600 border-slate-200',
+                            };
+                            $icon = match($act->status) {
+                            'approved' => 'fa-check',
+                            'pending' => 'fa-clock',
+                            'revision' => 'fa-rotate',
+                            'rejected' => 'fa-xmark',
+                            default => 'fa-bookmark',
+                            };
+                            @endphp
+                            <span class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-extrabold border uppercase tracking-wider {{ $badge }}">
+                                <i class="fa-solid {{ $icon }} text-[9px]"></i>
+                                <span>{{ strtoupper($act->status) }}</span>
+                            </span>
+                        </td>
 
-                            <!-- Catatan Pembimbing Column -->
-                            <td class="py-4 px-5 max-w-xs">
-                                @if($act->supervisor_note)
-                                    @php
-                                        $noteStyle = match($act->status) {
-                                            'approved' => 'bg-emerald-50 text-emerald-900 border-emerald-200',
-                                            'revision' => 'bg-amber-50 text-amber-900 border-amber-200',
-                                            'rejected' => 'bg-rose-50 text-rose-900 border-rose-200',
-                                            default => 'bg-slate-50 text-slate-800 border-slate-200',
-                                        };
-                                    @endphp
-                                    <div class="p-2.5 rounded-xl border text-[11px] font-semibold leading-snug {{ $noteStyle }}">
-                                        {{ $act->supervisor_note }}
-                                    </div>
-                                @else
-                                    <span class="text-slate-300 font-semibold">-</span>
-                                @endif
-                            </td>
+                        <!-- Catatan Pembimbing Column -->
+                        <td class="py-4 px-5 max-w-xs">
+                            @if($act->supervisor_note)
+                            @php
+                            $noteStyle = match($act->status) {
+                            'approved' => 'bg-emerald-50 text-emerald-900 border-emerald-200',
+                            'revision' => 'bg-amber-50 text-amber-900 border-amber-200',
+                            'rejected' => 'bg-rose-50 text-rose-900 border-rose-200',
+                            default => 'bg-slate-50 text-slate-800 border-slate-200',
+                            };
+                            @endphp
+                            <div class="p-2.5 rounded-xl border text-[11px] font-semibold leading-snug {{ $noteStyle }}">
+                                {{ $act->supervisor_note }}
+                            </div>
+                            @else
+                            <span class="text-slate-300 font-semibold">-</span>
+                            @endif
+                        </td>
 
-                            <!-- Aksi Column -->
-                            <td class="py-4 px-5 text-right whitespace-nowrap space-x-1">
-                                <button @click="selectedActivity = {{ json_encode($act) }}; detailModalOpen = true" 
-                                        class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs transition border border-slate-200 inline-flex items-center space-x-1.5 shadow-2xs">
-                                    <i class="fa-regular fa-eye text-slate-400 text-xs"></i>
-                                    <span>Lihat Detail</span>
-                                </button>
+                        <!-- Aksi Column -->
+                        <td class="py-4 px-5 text-right whitespace-nowrap space-x-1">
+                            <button @click="selectedActivity = {{ json_encode($act) }}; detailModalOpen = true"
+                                class="px-3 py-1.5 bg-white hover:bg-slate-50 text-slate-700 font-bold rounded-xl text-xs transition border border-slate-200 inline-flex items-center space-x-1.5 shadow-2xs">
+                                <i class="fa-regular fa-eye text-slate-400 text-xs"></i>
+                                <span>Lihat Detail</span>
+                            </button>
 
-                                @if(in_array($act->status, ['draft', 'revision']))
-                                    <a href="{{ route('intern.activities.edit', $act->id) }}" 
-                                       class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition inline-flex items-center space-x-1.5 shadow-2xs">
-                                        <i class="fa-regular fa-pen-to-square text-xs"></i>
-                                        <span>Edit</span>
-                                    </a>
-                                @endif
-                            </td>
-                        </tr>
+                            @if(in_array($act->status, ['draft', 'revision']))
+                            <a href="{{ route('intern.activities.edit', $act->id) }}"
+                                class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs transition inline-flex items-center space-x-1.5 shadow-2xs">
+                                <i class="fa-regular fa-pen-to-square text-xs"></i>
+                                <span>Edit</span>
+                            </a>
+                            @endif
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="6" class="py-12 text-center text-slate-400 text-xs font-semibold">
-                                Tidak ada riwayat aktivitas ditemukan.
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="6" class="py-12 text-center text-slate-400 text-xs font-semibold">
+                            Tidak ada riwayat aktivitas ditemukan.
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -207,13 +206,13 @@
                             <p class="text-slate-500 font-semibold mt-0.5" x-text="'Lokasi: ' + selectedActivity.work_location"></p>
                         </div>
                         <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
-                              :class="{
+                            :class="{
                                   'bg-emerald-50 text-emerald-700 border border-emerald-200': selectedActivity.status == 'approved',
                                   'bg-amber-50 text-amber-700 border border-amber-200': selectedActivity.status == 'pending',
                                   'bg-blue-50 text-blue-700 border border-blue-200': selectedActivity.status == 'revision',
                                   'bg-rose-50 text-rose-700 border border-rose-200': selectedActivity.status == 'rejected'
                               }"
-                              x-text="selectedActivity.status">
+                            x-text="selectedActivity.status">
                         </span>
                     </div>
 

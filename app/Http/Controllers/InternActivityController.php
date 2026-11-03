@@ -128,27 +128,41 @@ class InternActivityController extends Controller
             ->whereDate('date', $request->date)
             ->first();
 
-        if ($existing) {
-            return redirect()->back()->with('error', 'Anda sudah mengisi aktivitas harian untuk tanggal ini. Silakan edit entri yang ada jika diperlukan.');
+        if ($existing && $existing->status !== 'draft') {
+            return redirect()->back()->with('error', 'Anda sudah mengirimkan aktivitas harian untuk tanggal ini. Silakan perbarui entri jika berstatus revisi.');
         }
 
-        $attachmentPath = null;
+        $attachmentPath = $existing?->attachment_path;
         if ($request->hasFile('attachment')) {
+            if ($attachmentPath) {
+                Storage::disk('public')->delete($attachmentPath);
+            }
             $attachmentPath = $request->file('attachment')->store('attachments', 'public');
         }
 
         $status = $request->action === 'draft' ? 'draft' : 'pending';
 
-        DailyActivity::create([
-            'intern_id' => $userId,
-            'supervisor_id' => $internProfile?->supervisor_id,
-            'date' => $request->date,
-            'work_location' => $request->work_location,
-            'activity_description' => $request->activity_description ?? '',
-            'notes' => $request->notes,
-            'attachment_path' => $attachmentPath,
-            'status' => $status,
-        ]);
+        if ($existing) {
+            $existing->update([
+                'supervisor_id' => $internProfile?->supervisor_id ?? $existing->supervisor_id,
+                'work_location' => $request->work_location,
+                'activity_description' => $request->activity_description ?? '',
+                'notes' => $request->notes,
+                'attachment_path' => $attachmentPath,
+                'status' => $status,
+            ]);
+        } else {
+            DailyActivity::create([
+                'intern_id' => $userId,
+                'supervisor_id' => $internProfile?->supervisor_id,
+                'date' => $request->date,
+                'work_location' => $request->work_location,
+                'activity_description' => $request->activity_description ?? '',
+                'notes' => $request->notes,
+                'attachment_path' => $attachmentPath,
+                'status' => $status,
+            ]);
+        }
 
         $message = $status === 'draft' 
             ? 'Aktivitas harian berhasil disimpan sebagai DRAFT.' 

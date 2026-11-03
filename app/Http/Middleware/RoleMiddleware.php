@@ -27,14 +27,10 @@ class RoleMiddleware
             return redirect()->route('login')->withErrors(['email' => 'Akun Anda nonaktif. Silakan hubungi Admin HR Pelindo.']);
         }
 
-        if (!in_array($user->role, $roles)) {
-            // Redirect to appropriate dashboard based on their role
-            return match ($user->role) {
-                'admin' => redirect()->route('admin.dashboard'),
-                'supervisor' => redirect()->route('supervisor.dashboard'),
-                'intern' => redirect()->route('intern.dashboard'),
-                default => redirect()->route('login'),
-            };
+        $portal = $user->basePortal();
+
+        if (!in_array($user->role, $roles, true) && !in_array($portal, $roles, true)) {
+            return redirect()->to($user->homeRoute());
         }
 
         return $next($request);

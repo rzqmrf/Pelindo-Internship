@@ -4,22 +4,22 @@
 
 @section('content')
 <div class="space-y-6">
-    
+
     <!-- Hero Banner matching Supervisor screenshot -->
     <div class="bg-gradient-to-r from-blue-100/90 via-indigo-50/80 to-blue-50/60 rounded-3xl p-7 border border-blue-100/80 shadow-xs relative overflow-hidden">
         <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            
+
             <div class="space-y-4 flex-1">
                 <div class="flex items-center space-x-2">
                     <span class="px-3 py-1 bg-blue-600 text-white rounded-full text-[10px] font-extrabold uppercase tracking-wider">
                         PELINDO FIELD SUPERVISOR PANEL
                     </span>
                 </div>
-                
+
                 <h1 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     Selamat Datang, {{ Auth::user()->name }}! 👋
                 </h1>
-                
+
                 <p class="text-xs text-slate-600 font-medium max-w-xl leading-relaxed">
                     Monitoring bimbingan magang harian, persetujuan laporan aktivitas, serta evaluasi progres mahasiswa/siswa magang di divisi Anda.
                 </p>
@@ -88,7 +88,7 @@
 
     <!-- 4 Metric Cards Matching Screenshot -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         <!-- Metric 1: My Interns -->
         <a href="{{ route('supervisor.interns') }}" class="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between hover:border-blue-200 transition group">
             <div class="space-y-0.5">
@@ -149,7 +149,7 @@
 
     <!-- 2 Column Main Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
+
         <!-- Left Column: Antrian Approval Laporan (Pending) -->
         <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4 flex flex-col justify-between">
             <div class="space-y-4">
@@ -166,33 +166,33 @@
 
                 <div class="space-y-3">
                     @forelse($pendingQueue as $act)
-                        <div class="p-4 bg-slate-50/60 rounded-2xl border border-slate-100 flex items-center justify-between gap-4 hover:bg-slate-100/50 transition">
-                            <div class="flex items-start space-x-3.5">
-                                <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
-                                    {{ strtoupper(substr($act->intern?->name ?? 'I', 0, 1)) }}
-                                </div>
-                                <div class="space-y-1">
-                                    <div class="flex items-center space-x-2">
-                                        <span class="font-extrabold text-slate-800 text-xs">{{ $act->intern?->name }}</span>
-                                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-100 text-blue-800">
-                                            {{ $act->work_location }}
-                                        </span>
-                                    </div>
-                                    <p class="text-xs font-medium text-slate-600 leading-relaxed line-clamp-2">{{ $act->activity_description }}</p>
-                                    <p class="text-[10px] text-slate-400 font-semibold">
-                                        <i class="fa-regular fa-calendar mr-1"></i> {{ $act->date->format('d M Y') }} &bull; {{ $act->created_at ? $act->created_at->format('H:i') . ' WIB' : '' }}
-                                    </p>
-                                </div>
+                    <div class="p-4 bg-slate-50/60 rounded-2xl border border-slate-100 flex items-center justify-between gap-4 hover:bg-slate-100/50 transition">
+                        <div class="flex items-start space-x-3.5">
+                            <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-xs">
+                                {{ strtoupper(substr($act->intern?->name ?? 'I', 0, 1)) }}
                             </div>
-                            <a href="{{ route('supervisor.activities') }}" class="px-4 py-2 bg-[#005B9C] hover:bg-[#002B49] text-white text-xs font-extrabold rounded-xl transition shadow-xs shrink-0">
-                                Tinjau
-                            </a>
+                            <div class="space-y-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-extrabold text-slate-800 text-xs">{{ $act->intern?->name }}</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-100 text-blue-800">
+                                        {{ $act->work_location }}
+                                    </span>
+                                </div>
+                                <p class="text-xs font-medium text-slate-600 leading-relaxed line-clamp-2">{{ $act->activity_description }}</p>
+                                <p class="text-[10px] text-slate-400 font-semibold">
+                                    <i class="fa-regular fa-calendar mr-1"></i> {{ $act->date->format('d M Y') }} &bull; {{ $act->created_at ? $act->created_at->format('H:i') . ' WIB' : '' }}
+                                </p>
+                            </div>
                         </div>
+                        <a href="{{ route('supervisor.activities') }}" class="px-4 py-2 bg-[#005B9C] hover:bg-[#002B49] text-white text-xs font-extrabold rounded-xl transition shadow-xs shrink-0">
+                            Tinjau
+                        </a>
+                    </div>
                     @empty
-                        <div class="py-8 text-center text-slate-400 text-xs">
-                            <i class="fa-solid fa-circle-check text-2xl text-emerald-400 mb-2 block"></i>
-                            Semua laporan harian telah selesai diverifikasi!
-                        </div>
+                    <div class="py-8 text-center text-slate-400 text-xs">
+                        <i class="fa-solid fa-circle-check text-2xl text-emerald-400 mb-2 block"></i>
+                        Semua laporan harian telah selesai diverifikasi!
+                    </div>
                     @endforelse
                 </div>
             </div>
@@ -217,26 +217,26 @@
 
                 <div class="space-y-3.5">
                     @forelse($activityTimeline as $act)
-                        <div class="flex items-start space-x-3 text-xs">
-                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0
+                    <div class="flex items-start space-x-3 text-xs">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0
                                 {{ $act->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : ($act->status === 'revision' ? 'bg-blue-100 text-blue-700' : ($act->status === 'rejected' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700')) }}">
-                                <i class="fa-solid {{ $act->status === 'approved' ? 'fa-check' : ($act->status === 'revision' ? 'fa-rotate' : 'fa-hourglass') }}"></i>
-                            </div>
-                            <div class="flex-1 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-100/80 space-y-1">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-extrabold text-slate-800 text-xs">{{ $act->intern?->name }}</span>
-                                    <span class="text-[10px] text-slate-400 font-semibold">{{ $act->updated_at ? $act->updated_at->diffForHumans() : '' }}</span>
-                                </div>
-                                <p class="text-slate-600 font-medium line-clamp-1 text-xs">{{ $act->activity_description }}</p>
-                                @if($act->supervisor_note)
-                                    <div class="p-2 bg-amber-50 border border-amber-200/60 rounded-xl text-[11px] text-amber-900 font-semibold mt-1.5">
-                                        <strong>Catatan:</strong> {{ $act->supervisor_note }}
-                                    </div>
-                                @endif
-                            </div>
+                            <i class="fa-solid {{ $act->status === 'approved' ? 'fa-check' : ($act->status === 'revision' ? 'fa-rotate' : 'fa-hourglass') }}"></i>
                         </div>
+                        <div class="flex-1 bg-slate-50/80 p-3.5 rounded-2xl border border-slate-100/80 space-y-1">
+                            <div class="flex items-center justify-between">
+                                <span class="font-extrabold text-slate-800 text-xs">{{ $act->intern?->name }}</span>
+                                <span class="text-[10px] text-slate-400 font-semibold">{{ $act->updated_at ? $act->updated_at->diffForHumans() : '' }}</span>
+                            </div>
+                            <p class="text-slate-600 font-medium line-clamp-1 text-xs">{{ $act->activity_description }}</p>
+                            @if($act->supervisor_note)
+                            <div class="p-2 bg-amber-50 border border-amber-200/60 rounded-xl text-[11px] text-amber-900 font-semibold mt-1.5">
+                                <strong>Catatan:</strong> {{ $act->supervisor_note }}
+                            </div>
+                            @endif
+                        </div>
+                    </div>
                     @empty
-                        <p class="py-8 text-center text-slate-400 text-xs">Belum ada riwayat aktivitas bimbingan.</p>
+                    <p class="py-8 text-center text-slate-400 text-xs">Belum ada riwayat aktivitas bimbingan.</p>
                     @endforelse
                 </div>
             </div>
@@ -261,50 +261,50 @@
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             @forelse($announcements as $ann)
-                @php
-                    $annStyle = match($ann->category) {
-                        'important' => 'bg-rose-50/50 border-rose-150/40',
-                        'event' => 'bg-purple-50/50 border-purple-150/40',
-                        default => 'bg-slate-50/50 border-slate-200/80',
-                    };
-                    $categoryLabel = match($ann->category) {
-                        'important' => 'Penting',
-                        'event' => 'Event',
-                        default => 'Info',
-                    };
-                    $categoryBadge = match($ann->category) {
-                        'important' => 'bg-rose-100 text-rose-700',
-                        'event' => 'bg-purple-100 text-purple-700',
-                        default => 'bg-blue-100 text-blue-700',
-                    };
-                @endphp
-                <div class="p-4 rounded-2xl border {{ $annStyle }} flex flex-col justify-between gap-3 hover:bg-slate-50/60 transition">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between gap-1.5">
-                            <span class="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded {{ $categoryBadge }}">
-                                {{ $categoryLabel }}
-                            </span>
-                            <span class="text-[9px] text-slate-400 font-bold">
-                                {{ $ann->created_at ? $ann->created_at->diffForHumans() : '-' }}
-                            </span>
-                        </div>
-                        <h4 class="font-extrabold text-slate-800 text-xs leading-snug">{{ $ann->title }}</h4>
-                        <p class="text-[10px] text-slate-500 font-medium leading-relaxed whitespace-pre-line">{{ Str::limit($ann->content, 140) }}</p>
+            @php
+            $annStyle = match($ann->category) {
+            'important' => 'bg-rose-50/50 border-rose-150/40',
+            'event' => 'bg-purple-50/50 border-purple-150/40',
+            default => 'bg-slate-50/50 border-slate-200/80',
+            };
+            $categoryLabel = match($ann->category) {
+            'important' => 'Penting',
+            'event' => 'Event',
+            default => 'Info',
+            };
+            $categoryBadge = match($ann->category) {
+            'important' => 'bg-rose-100 text-rose-700',
+            'event' => 'bg-purple-100 text-purple-700',
+            default => 'bg-blue-100 text-blue-700',
+            };
+            @endphp
+            <div class="p-4 rounded-2xl border {{ $annStyle }} flex flex-col justify-between gap-3 hover:bg-slate-50/60 transition">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between gap-1.5">
+                        <span class="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded {{ $categoryBadge }}">
+                            {{ $categoryLabel }}
+                        </span>
+                        <span class="text-[9px] text-slate-400 font-bold">
+                            {{ $ann->created_at ? $ann->created_at->diffForHumans() : '-' }}
+                        </span>
                     </div>
-                    <div class="text-[9px] text-slate-400 font-bold border-t border-slate-200/40 pt-2 flex items-center gap-1.5">
-                        <i class="fa-regular fa-user text-[10px]"></i>
-                        <span>Oleh: {{ $ann->creator?->name ?? 'HR Admin' }}</span>
-                    </div>
+                    <h4 class="font-extrabold text-slate-800 text-xs leading-snug">{{ $ann->title }}</h4>
+                    <p class="text-[10px] text-slate-500 font-medium leading-relaxed whitespace-pre-line">{{ Str::limit($ann->content, 140) }}</p>
                 </div>
+                <div class="text-[9px] text-slate-400 font-bold border-t border-slate-200/40 pt-2 flex items-center gap-1.5">
+                    <i class="fa-regular fa-user text-[10px]"></i>
+                    <span>Oleh: {{ $ann->creator?->name ?? 'HR Admin' }}</span>
+                </div>
+            </div>
             @empty
-                <div class="col-span-3 py-6 text-center text-slate-400 text-xs">Belum ada pengumuman terbaru dari HR.</div>
+            <div class="col-span-3 py-6 text-center text-slate-400 text-xs">Belum ada pengumuman terbaru dari HR.</div>
             @endforelse
         </div>
     </div>
 
     <!-- Charts Row -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         <!-- Chart 1: Activity Submission Trend (Line) -->
         <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
             <div class="flex items-center justify-between border-b border-slate-50 pb-3">
@@ -374,8 +374,19 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
             }
         });
 
@@ -394,7 +405,11 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
                 cutout: '72%'
             }
         });

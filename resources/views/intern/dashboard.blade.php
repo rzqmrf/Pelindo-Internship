@@ -4,11 +4,11 @@
 
 @section('content')
 <div class="space-y-6">
-    
+
     <!-- Hero Banner matching exact screenshot design -->
     <div class="bg-gradient-to-r from-blue-100/90 via-indigo-50/80 to-blue-50/60 rounded-3xl p-7 border border-blue-100/80 shadow-xs relative overflow-hidden">
         <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            
+
             <div class="space-y-3 flex-1">
                 <div class="flex items-center space-x-2">
                     <span class="px-3 py-1 bg-blue-600 text-white rounded-full text-[10px] font-extrabold uppercase tracking-wider">
@@ -16,11 +16,11 @@
                     </span>
                     <span class="text-xs text-slate-500 font-semibold">&bull; {{ $internProfile?->division?->name ?? 'Divisi Teknologi Informasi & Digitalisasi' }}</span>
                 </div>
-                
+
                 <h1 class="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
                     Selamat Datang, {{ Auth::user()->name }} 👋
                 </h1>
-                
+
                 <p class="text-xs text-slate-600 font-medium">
                     Pembimbing Lapangan: <strong class="text-blue-700 font-bold">{{ $internProfile?->supervisor?->name ?? 'Ahmad Rizky, S.T.' }}</strong>
                 </p>
@@ -66,20 +66,20 @@
 
     <!-- Certificate Ready Banner (if published) -->
     @if($certificate)
-        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur text-white flex items-center justify-center text-lg font-bold">
-                    <i class="fa-solid fa-award"></i>
-                </div>
-                <div>
-                    <h3 class="font-extrabold text-xs">E-Sertifikat Resmi Magang Telah Terbit!</h3>
-                    <p class="text-[11px] text-blue-100">No: {{ $certificate->certificate_number }} &bull; Predikat telah disahkan oleh HR Pelindo.</p>
-                </div>
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur text-white flex items-center justify-center text-lg font-bold">
+                <i class="fa-solid fa-award"></i>
             </div>
-            <a href="{{ route('intern.certificate.index') }}" class="px-4 py-2 bg-white text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-50 transition shadow-sm">
-                Lihat & Unduh
-            </a>
+            <div>
+                <h3 class="font-extrabold text-xs">E-Sertifikat Resmi Magang Telah Terbit!</h3>
+                <p class="text-[11px] text-blue-100">No: {{ $certificate->certificate_number }} &bull; Predikat telah disahkan oleh HR Pelindo.</p>
+            </div>
         </div>
+        <a href="{{ route('intern.certificate.index') }}" class="px-4 py-2 bg-white text-blue-700 font-bold rounded-xl text-xs hover:bg-blue-50 transition shadow-sm">
+            Lihat & Unduh
+        </a>
+    </div>
     @endif
 
     <!-- Attendance & Daily Log Dual Status Banners -->
@@ -106,41 +106,41 @@
 
         <!-- Logbook Card -->
         @if(!$todayActivity)
-            <div class="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 text-amber-900 shadow-xs flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
-                        <i class="fa-solid fa-exclamation"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-extrabold text-xs">Logbook Hari Ini Belum Diisi</h3>
-                        <p class="text-[11px] text-amber-700">Segera catat rincian pengerjaan tugas.</p>
-                    </div>
+        <div class="bg-amber-50/90 border border-amber-200/80 rounded-2xl p-4 text-amber-900 shadow-xs flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                    <i class="fa-solid fa-exclamation"></i>
                 </div>
-                <a href="{{ route('intern.activities.create') }}" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-xs">
-                    Isi Sekarang
-                </a>
+                <div>
+                    <h3 class="font-extrabold text-xs">Logbook Hari Ini Belum Diisi</h3>
+                    <p class="text-[11px] text-amber-700">Segera catat rincian pengerjaan tugas.</p>
+                </div>
             </div>
+            <a href="{{ route('intern.activities.create') }}" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs transition shadow-xs">
+                Isi Sekarang
+            </a>
+        </div>
         @else
-            <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-4 text-emerald-900 shadow-xs flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
-                        <i class="fa-solid fa-check"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-extrabold text-xs">Logbook Hari Ini Terisi</h3>
-                        <p class="text-[11px] text-emerald-700">Status: <strong class="uppercase text-emerald-800">{{ $todayActivity->status }}</strong></p>
-                    </div>
+        <div class="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-4 text-emerald-900 shadow-xs flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold shadow-xs">
+                    <i class="fa-solid fa-check"></i>
                 </div>
-                <a href="{{ route('intern.activities.index') }}" class="px-3.5 py-1.5 bg-white text-emerald-700 border border-emerald-200 font-extrabold rounded-xl text-xs hover:bg-emerald-50 transition shadow-xs">
-                    Detail
-                </a>
+                <div>
+                    <h3 class="font-extrabold text-xs">Logbook Hari Ini Terisi</h3>
+                    <p class="text-[11px] text-emerald-700">Status: <strong class="uppercase text-emerald-800">{{ $todayActivity->status }}</strong></p>
+                </div>
             </div>
+            <a href="{{ route('intern.activities.index') }}" class="px-3.5 py-1.5 bg-white text-emerald-700 border border-emerald-200 font-extrabold rounded-xl text-xs hover:bg-emerald-50 transition shadow-xs">
+                Detail
+            </a>
+        </div>
         @endif
     </div>
 
     <!-- 4 Metric Cards Matching Screenshot -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        
+
         <!-- Metric 1: Status Hari Ini -->
         <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-xs flex items-center justify-between">
             <div class="space-y-1">
@@ -199,7 +199,7 @@
 
     <!-- 2 Column Main Section -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         <!-- Left Column: Riwayat Aktivitas Terakhir (Timeline list) -->
         <div class="lg:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
             <div class="flex items-center justify-between border-b border-slate-50 pb-3">
@@ -209,49 +209,49 @@
 
             <div class="space-y-4">
                 @forelse($recentActivities as $act)
-                    <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/80 flex items-start justify-between gap-4">
-                        <div class="flex items-start space-x-3.5">
-                            <!-- Date Badge Pill -->
-                            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-center flex flex-col items-center justify-center shrink-0 shadow-2xs">
-                                <span class="text-sm font-black text-slate-800 leading-none">{{ $act->date->format('d') }}</span>
-                                <span class="text-[9px] font-bold text-slate-400 uppercase mt-0.5 leading-none">{{ strtoupper($act->date->format('M')) }}</span>
-                            </div>
-
-                            <div class="space-y-1">
-                                <div class="flex items-center space-x-2">
-                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-100 text-blue-800">
-                                        {{ $act->work_location }}
-                                    </span>
-                                </div>
-                                <p class="text-xs font-medium text-slate-700 leading-relaxed">{{ $act->activity_description }}</p>
-                            </div>
+                <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-100/80 flex items-start justify-between gap-4">
+                    <div class="flex items-start space-x-3.5">
+                        <!-- Date Badge Pill -->
+                        <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 text-center flex flex-col items-center justify-center shrink-0 shadow-2xs">
+                            <span class="text-sm font-black text-slate-800 leading-none">{{ $act->date->format('d') }}</span>
+                            <span class="text-[9px] font-bold text-slate-400 uppercase mt-0.5 leading-none">{{ strtoupper($act->date->format('M')) }}</span>
                         </div>
 
-                        <!-- Status Pill right -->
-                        <div class="shrink-0">
-                            @php
-                                $statusStyle = match($act->status) {
-                                    'approved' => 'bg-emerald-100/80 text-emerald-800 border-emerald-200',
-                                    'pending' => 'bg-amber-100/80 text-amber-800 border-amber-200',
-                                    'revision' => 'bg-blue-100/80 text-blue-800 border-blue-200',
-                                    'rejected' => 'bg-rose-100/80 text-rose-800 border-rose-200',
-                                    default => 'bg-slate-100 text-slate-600 border-slate-200',
-                                };
-                            @endphp
-                            <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border {{ $statusStyle }}">
-                                {{ strtoupper($act->status) }}
-                            </span>
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase bg-blue-100 text-blue-800">
+                                    {{ $act->work_location }}
+                                </span>
+                            </div>
+                            <p class="text-xs font-medium text-slate-700 leading-relaxed">{{ $act->activity_description }}</p>
                         </div>
                     </div>
+
+                    <!-- Status Pill right -->
+                    <div class="shrink-0">
+                        @php
+                        $statusStyle = match($act->status) {
+                        'approved' => 'bg-emerald-100/80 text-emerald-800 border-emerald-200',
+                        'pending' => 'bg-amber-100/80 text-amber-800 border-amber-200',
+                        'revision' => 'bg-blue-100/80 text-blue-800 border-blue-200',
+                        'rejected' => 'bg-rose-100/80 text-rose-800 border-rose-200',
+                        default => 'bg-slate-100 text-slate-600 border-slate-200',
+                        };
+                        @endphp
+                        <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border {{ $statusStyle }}">
+                            {{ strtoupper($act->status) }}
+                        </span>
+                    </div>
+                </div>
                 @empty
-                    <div class="py-8 text-center text-slate-400 text-xs">Belum ada aktivitas terdaftar.</div>
+                <div class="py-8 text-center text-slate-400 text-xs">Belum ada aktivitas terdaftar.</div>
                 @endforelse
             </div>
         </div>
 
         <!-- Right Column: Progress Magang & Motivation Card -->
         <div class="space-y-6">
-            
+
             <!-- Papan Informasi HR Card -->
             <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
                 <div class="flex items-center justify-between border-b border-slate-50 pb-3">
@@ -264,37 +264,37 @@
 
                 <div class="space-y-3.5">
                     @forelse($announcements as $ann)
-                        @php
-                            $annStyle = match($ann->category) {
-                                'important' => 'bg-rose-50/50 border-rose-100',
-                                'event' => 'bg-purple-50/50 border-purple-100',
-                                default => 'bg-slate-50/50 border-slate-200/60',
-                            };
-                            $categoryLabel = match($ann->category) {
-                                'important' => 'Penting',
-                                'event' => 'Event',
-                                default => 'Info',
-                            };
-                            $categoryBadge = match($ann->category) {
-                                'important' => 'bg-rose-100 text-rose-700',
-                                'event' => 'bg-purple-100 text-purple-700',
-                                default => 'bg-blue-100 text-blue-700',
-                            };
-                        @endphp
-                        <div class="p-3.5 rounded-2xl border {{ $annStyle }} space-y-2">
-                            <div class="flex items-center justify-between gap-1.5">
-                                <span class="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded {{ $categoryBadge }}">
-                                    {{ $categoryLabel }}
-                                </span>
-                                <span class="text-[9px] text-slate-400 font-bold">
-                                    {{ $ann->created_at ? $ann->created_at->diffForHumans() : '-' }}
-                                </span>
-                            </div>
-                            <h4 class="font-extrabold text-slate-800 text-xs leading-snug">{{ $ann->title }}</h4>
-                            <p class="text-[10px] text-slate-500 font-medium leading-relaxed whitespace-pre-line">{{ Str::limit($ann->content, 120) }}</p>
+                    @php
+                    $annStyle = match($ann->category) {
+                    'important' => 'bg-rose-50/50 border-rose-100',
+                    'event' => 'bg-purple-50/50 border-purple-100',
+                    default => 'bg-slate-50/50 border-slate-200/60',
+                    };
+                    $categoryLabel = match($ann->category) {
+                    'important' => 'Penting',
+                    'event' => 'Event',
+                    default => 'Info',
+                    };
+                    $categoryBadge = match($ann->category) {
+                    'important' => 'bg-rose-100 text-rose-700',
+                    'event' => 'bg-purple-100 text-purple-700',
+                    default => 'bg-blue-100 text-blue-700',
+                    };
+                    @endphp
+                    <div class="p-3.5 rounded-2xl border {{ $annStyle }} space-y-2">
+                        <div class="flex items-center justify-between gap-1.5">
+                            <span class="px-2 py-0.5 text-[8px] font-black uppercase tracking-wider rounded {{ $categoryBadge }}">
+                                {{ $categoryLabel }}
+                            </span>
+                            <span class="text-[9px] text-slate-400 font-bold">
+                                {{ $ann->created_at ? $ann->created_at->diffForHumans() : '-' }}
+                            </span>
                         </div>
+                        <h4 class="font-extrabold text-slate-800 text-xs leading-snug">{{ $ann->title }}</h4>
+                        <p class="text-[10px] text-slate-500 font-medium leading-relaxed whitespace-pre-line">{{ Str::limit($ann->content, 120) }}</p>
+                    </div>
                     @empty
-                        <div class="py-6 text-center text-slate-400 text-[11px] font-bold">Tidak ada pengumuman terbaru dari HR.</div>
+                    <div class="py-6 text-center text-slate-400 text-[11px] font-bold">Tidak ada pengumuman terbaru dari HR.</div>
                     @endforelse
                 </div>
             </div>
@@ -347,7 +347,7 @@
                         Konsistensi hari ini adalah pencapaian besar di masa depan.
                     </p>
                 </div>
-                
+
                 <div class="text-blue-500 text-4xl transform rotate-12 opacity-80">
                     <i class="fa-solid fa-rocket text-blue-600"></i>
                 </div>

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\AllowanceClaim;
 use App\Models\DailyActivity;
+use App\Models\SystemSetting;
 use App\Models\User;
 use Carbon\Carbon;
 
@@ -12,6 +13,13 @@ class AllowanceService
     public int $wfoRate = 71250; // Rp 71.250 / hari
     public int $wfhRate = 71250; // Rp 71.250 / hari
     public int $wfaRate = 71250; // Rp 71.250 / hari (Work From Anywhere / Tugas Luar)
+
+    public function __construct()
+    {
+        $this->wfoRate = max(0, (int) SystemSetting::getValue('allowance_wfo_rate', 71250));
+        $this->wfhRate = max(0, (int) SystemSetting::getValue('allowance_wfh_rate', 71250));
+        $this->wfaRate = max(0, (int) SystemSetting::getValue('allowance_wfa_rate', 71250));
+    }
 
     /**
      * Get all 20-weekday periods for an intern.

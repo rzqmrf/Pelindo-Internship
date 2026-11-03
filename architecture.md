@@ -11,13 +11,21 @@
 
 ## 2. Database Schema Design
 
-### A. Users Table
-Menampung data otentikasi dasar untuk semua role.
-- `id` (Primary Key)
-- `name` (Nama lengkap)
-- `email` (Email unik perorangan / institusi)
-- `password` (Hash sandi)
-- `role` (Enum: `admin`, `supervisor`, `intern`)
+### A. Users & Dynamic Roles (RBAC) Tables
+Menampung data otentikasi dan manajemen hak akses role dinamis yang dapat ditambah oleh Superadmin.
+- `users`:
+  - `id` (Primary Key)
+  - `name` (Nama lengkap)
+  - `email` (Email unik perorangan / institusi)
+  - `password` (Hash sandi)
+  - `role` (String kode role, terhubung ke `roles.slug`, mendukung 4 role sistem `superadmin`, `admin`, `supervisor`, `intern` serta role kustom baru seperti `finance`, `auditor`, `kepala_divisi`)
+  - `is_active` (Status aktif akun)
+- `roles`:
+  - `slug` (Kode unik sistem), `name` (Nama tampilan), `base_portal` (`admin`/`supervisor`/`intern`/`superadmin`), `permissions` (JSON daftar izin modul), `badge_color`, dan `is_system` (proteksi role inti).
+
+### A2. System Settings & Audit Logs Tables
+- `system_settings`: Menyimpan konfigurasi sistem terpusat (`maintenance_mode`, `maintenance_bypass_token`, `banner_enabled`, parameter geofencing GPS, jam batas masuk, serta tarif uang saku harian) dengan cache otomatis.
+- `audit_logs`: Menyimpan rekam jejak keamanan atas aksi sensitif beserta pelaku, `impersonator_id`, alamat IP, dan waktu kejadian.
 
 ### B. Divisions Table
 Mengelola divisi/unit kerja Pelindo beserta kuota maksimal penampungan anak magang.

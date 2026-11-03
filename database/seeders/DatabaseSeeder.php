@@ -3,10 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Role;
 use App\Models\Division;
 use App\Models\SupervisorProfile;
 use App\Models\InternProfile;
 use App\Models\DailyActivity;
+use App\Models\SystemSetting;
+use App\Models\AuditLog;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
@@ -18,6 +21,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        Role::ensureDefaults();
+
         // 1. Seed Divisions
         $divIT = Division::create([
             'code' => 'IT-DIGITAL',
@@ -68,6 +73,26 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $password = Hash::make('password123');
+
+        // 1b. Superadmin / System Developer
+        $superAdmin = User::create([
+            'name' => 'Tim Pengembang IT Pelindo',
+            'email' => 'superadmin@pelindo.co.id',
+            'role' => 'superadmin',
+            'phone' => '081130009999',
+            'password' => $password,
+            'is_active' => true,
+        ]);
+
+        SystemSetting::setMany(SystemSetting::defaults(), $superAdmin->id);
+
+        AuditLog::create([
+            'user_id' => $superAdmin->id,
+            'action' => 'system.seed',
+            'module' => 'system',
+            'description' => 'Inisialisasi awal sistem dan konfigurasi pemeliharaan Pelindo Internship Portal.',
+            'ip_address' => '127.0.0.1',
+        ]);
 
         // 2. Admin HR
         $admin = User::create([

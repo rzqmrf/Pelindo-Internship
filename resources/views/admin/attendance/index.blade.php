@@ -1,139 +1,142 @@
 @extends('layouts.app')
 
-@section('title', 'Rekap Presensi Harian Seluruh Divisi')
+@section('page_title', 'Rekap Presensi Harian Seluruh Divisi')
 
 @section('content')
 <div class="space-y-6">
     <!-- Centralized Page Header -->
-    <x-page-header 
-        title="Rekap Kehadiran Peserta Magang (HR)" 
-        subtitle="Monitoring kepatuhan jam kerja dan distribusi kehadiran WFO/WFH/WFA seluruh divisi." 
-        icon="fa-solid fa-clipboard-user"
-    />
+    <x-page-header
+        title="Rekap Kehadiran Peserta Magang (HR)"
+        subtitle="Monitoring kepatuhan jam kerja dan distribusi kehadiran WFO/WFH/WFA seluruh divisi."
+        icon="fa-solid fa-clipboard-user" />
 
-    <!-- Filter & Search Bar -->
-    <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
-        <form method="GET" action="{{ route('admin.attendance.index') }}" class="flex flex-wrap items-center gap-3">
-            <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-600">Tanggal:</label>
-                <input type="date" name="date" value="{{ $date }}" class="text-xs font-bold rounded-2xl border border-slate-200 py-2.5 px-3.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
+    <!-- 4 KPI Stat Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <x-stat-card
+            title="Total Hadir"
+            value="{{ $totalPresentToday }} / {{ $allActiveInterns }}"
+            trend="Peserta magang"
+            trend-type="up"
+            icon="fa-solid fa-user-check"
+            color="emerald" />
+
+        <x-stat-card
+            title="WFO (Kantor)"
+            value="{{ $totalWfoToday }}"
+            trend="Kehadiran Fisik"
+            trend-type="up"
+            icon="fa-solid fa-building"
+            color="blue" />
+
+        <x-stat-card
+            title="WFH (Remote)"
+            value="{{ $totalWfhToday }}"
+            trend="Bekerja Remote"
+            trend-type="up"
+            icon="fa-solid fa-[#005B9C]"
+            color="indigo" />
+
+        <x-stat-card
+            title="Terlambat"
+            value="{{ $totalLateToday }}"
+            trend="Perlu diperhatikan"
+            trend-type="down"
+            icon="fa-solid fa-clock font-black"
+            color="amber" />
+    </div>
+
+    <!-- Filter & Search Bar wrapped in Card -->
+    <x-card>
+        <form method="GET" action="{{ route('admin.attendance.index') }}" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+            <x-form-input
+                type="date"
+                name="date"
+                label="Pilih Tanggal Presensi"
+                value="{{ $date }}" />
+
+            <x-form-select name="division_id" label="Filter Divisi">
+                <option value="">Semua Divisi</option>
+                @foreach($divisions as $div)
+                <option value="{{ $div->id }}" {{ $divisionId == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                @endforeach
+            </x-form-select>
+
+            <div class="flex items-center gap-3 pt-6">
+                <x-button type="submit" variant="primary" class="flex-1 justify-center" icon="fa-solid fa-filter">
+                    Filter Presensi
+                </x-button>
+                <x-button href="{{ route('admin.attendance.index') }}" variant="outline" icon="fa-solid fa-rotate">
+                    Reset
+                </x-button>
             </div>
-
-            <div class="flex items-center gap-2">
-                <label class="text-xs font-bold text-slate-600">Divisi:</label>
-                <select name="division_id" class="text-xs font-bold rounded-2xl border border-slate-200 py-2.5 px-3.5 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition">
-                    <option value="">Semua Divisi</option>
-                    @foreach($divisions as $div)
-                        <option value="{{ $div->id }}" {{ $divisionId == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <button type="submit" class="bg-[#0B63E5] hover:bg-blue-700 text-white font-extrabold text-xs px-5 py-2.5 rounded-2xl transition shadow-xs flex items-center gap-1.5">
-                <i class="fa-solid fa-filter"></i>
-                <span>Filter</span>
-            </button>
-            <a href="{{ route('admin.attendance.index') }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-4 py-2.5 rounded-2xl transition flex items-center gap-1.5">
-                <i class="fa-solid fa-rotate"></i>
-                <span>Reset</span>
-            </a>
         </form>
-    </div>
+    </x-card>
 
-    <!-- Counters -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Total Hadir</span>
-            <span class="text-2xl font-black text-slate-900 block mt-1">{{ $totalPresentToday }} / {{ $allActiveInterns }}</span>
-        </div>
-        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-            <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block">WFO (Kantor)</span>
-            <span class="text-2xl font-black text-blue-700 block mt-1">{{ $totalWfoToday }}</span>
-        </div>
-        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-            <span class="text-[11px] font-bold text-indigo-600 uppercase tracking-wider block">WFH (Remote)</span>
-            <span class="text-2xl font-black text-indigo-700 block mt-1">{{ $totalWfhToday }}</span>
-        </div>
-        <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm">
-            <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider block">Terlambat</span>
-            <span class="text-2xl font-black text-amber-700 block mt-1">{{ $totalLateToday }}</span>
-        </div>
-    </div>
-
-    <!-- Table -->
-    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="text-sm font-bold text-slate-800">
-                Data Presensi Tanggal {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM YYYY') }}
-            </h2>
-        </div>
+    <!-- Attendance Table Card -->
+    <x-card padding="p-0">
+        <x-slot name="title">Data Presensi Tanggal {{ \Carbon\Carbon::parse($date)->isoFormat('dddd, D MMMM YYYY') }}</x-slot>
+        <x-slot name="subtitle">Daftar presensi seluruh peserta magang yang tercatat di sistem pada tanggal yang dipilih.</x-slot>
+        <x-slot name="icon">fa-solid fa-list-check</x-slot>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50/75 border-b border-slate-100 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                        <th class="py-3.5 px-5">Peserta Magang</th>
-                        <th class="py-3.5 px-5">Divisi / Pembimbing</th>
-                        <th class="py-3.5 px-5 text-center">Mode</th>
-                        <th class="py-3.5 px-5 text-center">Masuk</th>
-                        <th class="py-3.5 px-5 text-center">Pulang</th>
-                        <th class="py-3.5 px-5 text-center">Jarak</th>
-                        <th class="py-3.5 px-5 text-right">Status</th>
+                    <tr class="bg-slate-50/80 border-b border-slate-100 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        <th class="py-4 px-6">Peserta Magang</th>
+                        <th class="py-4 px-4">Divisi / Pembimbing</th>
+                        <th class="py-4 px-4 text-center">Mode</th>
+                        <th class="py-4 px-4 text-center">Masuk</th>
+                        <th class="py-4 px-4 text-center">Pulang</th>
+                        <th class="py-4 px-4 text-center">Jarak</th>
+                        <th class="py-4 px-6 text-right">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-xs">
+                <tbody class="divide-y divide-slate-100 text-sm font-semibold text-slate-700">
                     @forelse($attendances as $att)
-                        <tr class="hover:bg-slate-50/50 transition">
-                            <td class="py-4 px-5">
-                                <span class="font-bold text-slate-900 block">{{ $att->intern?->name }}</span>
-                                <span class="text-[11px] text-slate-400">{{ $att->intern?->internProfile?->institution ?? '-' }}</span>
-                            </td>
-                            <td class="py-4 px-5">
-                                <span class="font-bold text-slate-800 block">{{ $att->intern?->internProfile?->division?->name ?? '-' }}</span>
-                                <span class="text-[11px] text-slate-500">Spv: {{ $att->intern?->internProfile?->supervisor?->name ?? '-' }}</span>
-                            </td>
-                            <td class="py-4 px-5 text-center">
-                                <span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold {{ $att->work_location === 'WFO' ? 'bg-blue-50 text-blue-600' : 'bg-indigo-50 text-indigo-600' }}">
-                                    {{ $att->work_location }}
-                                </span>
-                            </td>
-                            <td class="py-4 px-5 text-center font-mono font-bold text-slate-800">
-                                {{ $att->check_in_time ? substr($att->check_in_time, 0, 5) : '-' }}
-                            </td>
-                            <td class="py-4 px-5 text-center font-mono font-bold text-slate-800">
-                                {{ $att->check_out_time ? substr($att->check_out_time, 0, 5) : '-' }}
-                            </td>
-                            <td class="py-4 px-5 text-center text-slate-500">
-                                {{ $att->check_in_distance_meters !== null ? $att->check_in_distance_meters . ' m' : '-' }}
-                            </td>
-                            <td class="py-4 px-5 text-right">
-                                @if($att->status === 'present')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
-                                        Tepat Waktu
-                                    </span>
-                                @elseif($att->status === 'late')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-200">
-                                        Terlambat
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
+                    <tr class="hover:bg-slate-50/60 transition">
+                        <td class="py-4 px-6">
+                            <span class="font-extrabold text-slate-900 text-sm block leading-snug">{{ $att->intern?->name }}</span>
+                            <span class="text-xs text-slate-500 font-medium">{{ $att->intern?->internProfile?->institution ?? '-' }}</span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="font-bold text-slate-800 block text-xs leading-snug">{{ $att->intern?->internProfile?->division?->name ?? '-' }}</span>
+                            <span class="text-xs text-slate-500 font-medium">Spv: {{ $att->intern?->internProfile?->supervisor?->name ?? '-' }}</span>
+                        </td>
+                        <td class="py-4 px-4 text-center">
+                            <x-badge :status="$att->work_location" />
+                        </td>
+                        <td class="py-4 px-4 text-center font-mono font-bold text-slate-800 text-sm">
+                            {{ $att->check_in_time ? substr($att->check_in_time, 0, 5) : '-' }}
+                        </td>
+                        <td class="py-4 px-4 text-center font-mono font-bold text-slate-800 text-sm">
+                            {{ $att->check_out_time ? substr($att->check_out_time, 0, 5) : '-' }}
+                        </td>
+                        <td class="py-4 px-4 text-center text-slate-600 font-medium text-xs">
+                            {{ $att->check_in_distance_meters !== null ? $att->check_in_distance_meters . ' m' : '-' }}
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <x-badge :status="$att->status" />
+                        </td>
+                    </tr>
                     @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-10 text-slate-400">
-                                Tidak ada data presensi pada tanggal ini.
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="7" class="py-8">
+                            <x-empty-state
+                                title="Tidak ada data presensi"
+                                subtitle="Belum ada pencatatan presensi peserta magang pada tanggal ini."
+                                icon="fa-solid fa-calendar-xmark" />
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
 
         @if($attendances->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $attendances->links() }}
-            </div>
+        <div class="p-5 border-t border-slate-100 bg-slate-50/50 rounded-b-3xl">
+            {{ $attendances->links() }}
+        </div>
         @endif
-    </div>
+    </x-card>
 </div>
 @endsection

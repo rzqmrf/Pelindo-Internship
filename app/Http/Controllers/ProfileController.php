@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -80,6 +81,8 @@ class ProfileController extends Controller
         Auth::user()->update([
             'password' => Hash::make($request->password),
         ]);
+
+        AuditLogger::record('profile.password_change', 'auth', 'Pengguna memperbarui kata sandi akunnya.', Auth::user());
 
         return redirect()->back()->with('success', 'Password Anda berhasil diperbarui.');
     }

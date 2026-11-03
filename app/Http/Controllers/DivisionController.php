@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Division;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 
 class DivisionController extends Controller
@@ -52,7 +53,8 @@ class DivisionController extends Controller
             'head_name' => 'nullable|string|max:255',
         ]);
 
-        Division::create($request->all());
+        $division = Division::create($request->all());
+        AuditLogger::record('division.create', 'divisions', "Divisi baru dibuat: {$division->name} ({$division->code}).", $division);
 
         return redirect()->back()->with('success', 'Divisi baru berhasil ditambahkan.');
     }

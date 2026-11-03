@@ -7,6 +7,7 @@ use App\Models\InternAssessment;
 use App\Models\Certificate;
 use App\Models\InternProfile;
 use App\Models\Notification;
+use App\Services\AuditLogger;
 use App\Services\FileStorageService;
 use App\Services\ReportService;
 use Illuminate\Http\Request;
@@ -190,6 +191,13 @@ class AssessmentController extends Controller
             'message' => "Selamat! E-Sertifikat Magang resmi Pelindo Anda telah diterbitkan dengan nomor {$certificate->certificate_number}. Anda dapat mengunduhnya sekarang.",
             'is_read' => false,
         ]);
+
+        AuditLogger::record(
+            'certificate.publish',
+            'certificate',
+            "E-Sertifikat {$certificate->certificate_number} diterbitkan untuk peserta ID #{$assessment->intern_id}.",
+            $certificate
+        );
 
         return back()->with('success', "E-Sertifikat resmi berhasil diterbitkan dengan nomor {$certificate->certificate_number}.");
     }

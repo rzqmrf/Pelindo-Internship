@@ -3,19 +3,47 @@
 @section('page_title', 'Verifikasi & Pencairan Uang Saku HR')
 
 @section('content')
-<div class="space-y-6" x-data="{ hrModalOpen: false, selectedClaim: null, hrNote: '' }">
+<div class="space-y-6" x-data="{ 
+    hrModalOpen: false, 
+    periodModalOpen: false, 
+    selectedClaim: null, 
+    hrNote: '',
+    title: '',
+    startDate: '',
+    endDate: '',
+    subStartDate: '',
+    subEndDate: '',
+    get logbookDays() {
+        if (!this.startDate || !this.endDate) return 0;
+        const diff = new Date(this.endDate) - new Date(this.startDate);
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1;
+        return days > 0 ? days : 0;
+    },
+    get submissionDays() {
+        if (!this.subStartDate || !this.subEndDate) return 0;
+        const diff = new Date(this.subEndDate) - new Date(this.subStartDate);
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24)) + 1;
+        return days > 0 ? days : 0;
+    }
+}">
 
     <!-- Centralized Page Header -->
     <x-page-header 
         title="Verifikasi & Pencairan Uang Saku" 
-        subtitle="Kelola pencairan uang saku mahasiswa magang bulanan yang telah disetujui oleh pembimbing lapangan." 
+        subtitle="Kelola jadwal buka periode pengajuan klaim dan verifikasi pencairan uang saku mahasiswa." 
         icon="fa-solid fa-money-check-dollar"
     >
         <x-slot:action>
-            <a href="{{ route('admin.allowance.export_payroll', request()->all()) }}" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-extrabold transition flex items-center space-x-2 shadow-2xs">
-                <i class="fa-solid fa-file-excel"></i>
-                <span>Ekspor Payroll Excel/CSV</span>
-            </a>
+            <div class="flex items-center gap-2">
+                <button @click="periodModalOpen = true" class="px-4 py-2.5 bg-[#005B9C] hover:bg-blue-800 text-white rounded-2xl text-xs font-extrabold transition flex items-center space-x-2 shadow-2xs">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    <span>Buka Periode Submit Baru</span>
+                </button>
+                <a href="{{ route('admin.allowance.export_payroll', request()->all()) }}" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-extrabold transition flex items-center space-x-2 shadow-2xs">
+                    <i class="fa-solid fa-file-excel"></i>
+                    <span>Ekspor Payroll Excel/CSV</span>
+                </a>
+            </div>
         </x-slot:action>
     </x-page-header>
 
@@ -32,7 +60,99 @@
         </div>
     @endif
 
-    <!-- Filters Bar -->
+    <!-- Section 1: Daftar Periode Submit Klaim (Diatur Manual oleh Admin HR) -->
+    <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="font-black text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-[#005B9C]"></i>
+                    <span>Jadwal & Periode Pengajuan Klaim Uang Saku (Aktif)</span>
+                </h3>
+                <p class="text-xs text-slate-400 font-semibold mt-0.5">Admin HR menentukan secara manual rentang logbook dan durasi berapa hari jendela pengajuan dibuka.</p>
+            </div>
+            <button @click="periodModalOpen = true" class="px-3.5 py-2 bg-blue-50 hover:bg-blue-100 text-[#005B9C] border border-blue-200/60 rounded-xl text-xs font-extrabold transition inline-flex items-center gap-1.5 self-start sm:self-auto">
+                <i class="fa-solid fa-plus"></i>
+                <span>Tambah Periode Buka</span>
+            </button>
+        </div>
+
+        @if($periods->isEmpty())
+        <div class="p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200 text-center space-y-2">
+            <i class="fa-solid fa-calendar-xmark text-slate-400 text-2xl"></i>
+            <p class="text-xs font-bold text-slate-700">Belum ada periode pengajuan klaim yang dibuat oleh HR Admin.</p>
+            <p class="text-[11px] text-slate-500">Klik "Buka Periode Submit Baru" di atas untuk membuka jadwal submit bagi peserta magang.</p>
+        </div>
+        @else
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                        <th class="py-3 px-4">Judul Periode Klaim</th>
+                        <th class="py-3 px-4">Rentang Logbook (Presensi)</th>
+                        <th class="py-3 px-4">Jadwal Submit (Buka HR)</th>
+                        <th class="py-3 px-4 text-center">Durasi Buka Submit</th>
+                        <th class="py-3 px-4 text-center">Status Jendela Submit</th>
+                        <th class="py-3 px-4 text-right">Aksi HR</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 text-xs font-bold text-slate-700">
+                    @foreach($periods as $p)
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="py-3.5 px-4 font-extrabold text-slate-900">
+                            {{ $p->title }}
+                        </td>
+                        <td class="py-3.5 px-4 font-mono text-slate-650">
+                            {{ $p->start_date->format('d/m/Y') }} s.d {{ $p->end_date->format('d/m/Y') }}
+                            <span class="text-[10px] text-blue-600 font-extrabold block">({{ $p->logbook_days }} Hari Presensi)</span>
+                        </td>
+                        <td class="py-3.5 px-4 font-mono text-slate-650">
+                            {{ $p->submission_start_date->format('d/m/Y') }} s.d {{ $p->submission_end_date->format('d/m/Y') }}
+                        </td>
+                        <td class="py-3.5 px-4 text-center font-extrabold text-slate-800">
+                            <span class="px-2.5 py-1 bg-blue-50 text-[#005B9C] rounded-xl border border-blue-200">
+                                {{ $p->submission_days }} Hari
+                            </span>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">
+                            @if($p->is_open)
+                                <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-black border border-emerald-200 inline-flex items-center gap-1">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    DIBUKA (Tersisa {{ $p->remaining_days }} Hari)
+                                </span>
+                            @elseif(!$p->is_active)
+                                <span class="px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full text-[10px] font-bold border border-slate-200">
+                                    NONAKTIF (HR CLOSED)
+                                </span>
+                            @else
+                                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-full text-[10px] font-bold border border-amber-200">
+                                    DITUTUP / EXPIRED
+                                </span>
+                            @endif
+                        </td>
+                        <td class="py-3.5 px-4 text-right space-x-1.5">
+                            <form action="{{ route('admin.allowance_periods.toggle', $p->id) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 {{ $p->is_active ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200' }} border rounded-xl text-[11px] font-bold transition">
+                                    {{ $p->is_active ? 'Tutup' : 'Buka' }}
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.allowance_periods.destroy', $p->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus periode pengajuan ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl transition text-xs">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        @endif
+    </div>
+
+    <!-- Section 2: Filters Bar -->
     <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
         <form method="GET" action="{{ route('admin.allowance.index') }}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-center">
             
@@ -67,7 +187,7 @@
             <div class="flex items-center gap-3 col-span-1 sm:col-span-2">
                 <button type="submit" class="flex-1 py-2.5 bg-[#0B63E5] hover:bg-blue-750 text-white rounded-2xl text-xs font-extrabold transition flex items-center justify-center space-x-1.5 shadow-2xs">
                     <i class="fa-solid fa-sliders"></i>
-                    <span>Filter</span>
+                    <span>Filter Klaim</span>
                 </button>
                 <a href="{{ route('admin.allowance.index') }}" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-650 rounded-2xl text-xs font-extrabold hover:bg-slate-50 transition flex items-center justify-center space-x-1.5 shadow-2xs">
                     <i class="fa-solid fa-rotate text-xs"></i>
@@ -77,11 +197,11 @@
         </form>
     </div>
 
-    <!-- Table/Grid List -->
+    <!-- Section 3: Table List Klaim Masuk -->
     <form action="{{ route('admin.allowance.bulk_process') }}" method="POST" id="bulkForm" class="bg-white rounded-3xl p-6 border border-slate-100 shadow-xs space-y-4">
         @csrf
         <div class="flex items-center justify-between pb-2 border-b border-slate-100">
-            <span class="text-xs font-bold text-slate-500">Pilih klaim yang disetujui untuk pencairan massal:</span>
+            <span class="text-xs font-bold text-slate-500">Pilih klaim yang disetujui pembimbing untuk pencairan massal:</span>
             <button type="submit" onclick="return confirm('Apakah Anda yakin ingin mencairkan seluruh klaim tercentang?')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs">
                 <i class="fa-solid fa-check-double mr-1"></i> Cairkan Massal Tercentang
             </button>
@@ -94,13 +214,13 @@
                         <th class="py-3.5 px-3 text-center">
                             <input type="checkbox" onclick="document.querySelectorAll('.claim-checkbox').forEach(cb => cb.checked = this.checked)" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer">
                         </th>
-                        <th class="py-3.5 px-5">Periode</th>
+                        <th class="py-3.5 px-5">Periode Logbook</th>
                         <th class="py-3.5 px-4">Nama & Divisi</th>
                         <th class="py-3.5 px-4">Presensi</th>
                         <th class="py-3.5 px-4">Uang Saku</th>
                         <th class="py-3.5 px-4">Tujuan Rekening</th>
                         <th class="py-3.5 px-4">Status</th>
-                        <th class="py-3.5 px-5 text-right">Aksi</th>
+                        <th class="py-3.5 px-5 text-right">Aksi HR</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-50 text-xs font-bold text-slate-700">
@@ -157,6 +277,7 @@
                             <td class="py-4 px-5 text-right">
                                 @if($claim->status === 'approved_by_supervisor')
                                     <button @click="selectedClaim = {{ json_encode($claim) }}; hrNote = ''; hrModalOpen = true" 
+                                            type="button"
                                             class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-extrabold transition shadow-2xs inline-flex items-center space-x-1">
                                         <i class="fa-solid fa-check-double"></i>
                                         <span>Proses Cair</span>
@@ -168,7 +289,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="py-12 text-center text-slate-400">
+                            <td colspan="8" class="py-12 text-center text-slate-400">
                                 <div class="w-12 h-12 bg-slate-100 text-slate-450 rounded-full flex items-center justify-center text-lg mx-auto mb-2">
                                     <i class="fa-solid fa-receipt"></i>
                                 </div>
@@ -186,7 +307,83 @@
         </div>
     </form>
 
-    <!-- HR Process Modal -->
+    <!-- Modal 1: Tambah Periode Submit Klaim Baru -->
+    <div x-show="periodModalOpen" 
+         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" 
+         x-transition.opacity 
+         x-cloak>
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 border border-slate-100 shadow-xl" @click.away="periodModalOpen = false">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#005B9C] flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                    </div>
+                    <h3 class="font-black text-slate-800 text-sm">Buka Periode Submit Klaim Baru</h3>
+                </div>
+                <button @click="periodModalOpen = false" class="text-slate-400 hover:text-slate-650 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.allowance_periods.store') }}" method="POST" class="space-y-4 text-xs font-semibold">
+                @csrf
+                
+                <div>
+                    <label class="block font-extrabold text-slate-800 mb-1">Judul Periode Klaim *</label>
+                    <input type="text" name="title" x-model="title" required placeholder="Contoh: Klaim Uang Saku September 2026"
+                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:ring-2 focus:ring-blue-600 focus:bg-white outline-none">
+                </div>
+
+                <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-3">
+                    <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider block">1. Rentang Presensi Logbook Yang Diklaim</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tanggal Mulai Logbook</label>
+                            <input type="date" name="start_date" x-model="startDate" required
+                                class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tanggal Selesai Logbook</label>
+                            <input type="date" name="end_date" x-model="endDate" required
+                                class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none">
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[11px] font-extrabold text-[#005B9C]" x-text="'Total Presensi: ' + logbookDays + ' Hari'"></span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-blue-50/70 border border-blue-200/80 rounded-2xl space-y-3">
+                    <span class="text-[10px] font-extrabold text-[#005B9C] uppercase tracking-wider block">2. Tanggal HR Membuka Submit Pengajuan</span>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tanggal Buka Submit</label>
+                            <input type="date" name="submission_start_date" x-model="subStartDate" required
+                                class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tanggal Tutup Submit</label>
+                            <input type="date" name="submission_end_date" x-model="subEndDate" required
+                                class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-bold text-slate-900 outline-none">
+                        </div>
+                    </div>
+                    <div class="p-2 bg-white rounded-xl border border-blue-100 flex items-center justify-between">
+                        <span class="text-[10px] text-slate-500 font-bold">Lama Jendela Pengajuan:</span>
+                        <span class="text-sm font-black text-[#005B9C]" x-text="submissionDays + ' Hari Buka'"></span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" @click="periodModalOpen = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-[#005B9C] hover:bg-blue-800 text-white rounded-xl font-extrabold transition">
+                        Buka Periode Submit
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal 2: HR Process Modal (Cairkan) -->
     <div x-show="hrModalOpen" 
          class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs" 
          x-transition.opacity 
