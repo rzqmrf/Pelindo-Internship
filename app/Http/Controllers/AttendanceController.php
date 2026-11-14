@@ -52,6 +52,10 @@ class AttendanceController extends Controller
         $totalLate = Attendance::where('intern_id', $userId)->where('status', 'late')->count();
 
         $dailyQrToken = $this->attendanceService->getDailyQrToken();
+        $corrections = \App\Models\AttendanceCorrection::where('intern_id', $userId)
+            ->latest('date')
+            ->take(10)
+            ->get();
 
         return view('intern.attendance.index', compact(
             'todayAttendance',
@@ -61,7 +65,8 @@ class AttendanceController extends Controller
             'totalWfo',
             'totalWfh',
             'totalLate',
-            'dailyQrToken'
+            'dailyQrToken',
+            'corrections'
         ));
     }
 
@@ -219,29 +224,112 @@ class AttendanceController extends Controller
         return back()->with('success', "Check-out berhasil tercatat pada pukul " . $now->format('H:i:s') . ". Terima kasih atas kerja keras Anda hari ini!");
     }
 
+    public function requestCorrection(Request $request)
+    {
+        $request->validate([
+            'date' => 'required|date|before_or_equal:today',
+            'correction_type' => 'required|in:missed_checkin,missed_checkout,gps_issue,both',
+            'requested_check_in' => 'nullable|date_format:H:i',
+            'requested_check_out' => 'nullable|date_format:H:i',
+            'work_location' => 'required|in:WFO,WFH,WFA',
+            'reason' => 'required|string|min:10|max:1000',
+            'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $attachmentPath = null;
+        if ($request->hasFile('attachment')) {
+            $attachmentPath = $request->file('attachment')->store('attendance_corrections', 'public');
+        }
+
+        $profile = Auth::user()->internProfile;
+        $correction = \App\Models\AttendanceCorrection::create([
+            'intern_id' => Auth::id(),
+            'supervisor_id' => $profile?->supervisor_id,
+            'date' => $request->date,
+            'correction_type' => $request->correction_type,
+            'requested_check_in' => $request->requested_check_in,
+            'requested_check_out' => $request->requested_check_out,
+            'work_location' => $request->work_location,
+            'reason' => $request->reason,
+            'attachment_path' => $attachmentPath,
+            'status' => 'pending',
+        ]);
+
+        if ($profile?->supervisor_id) {
+            \App\Models\Notification::create([
+                'user_id' => $profile->supervisor_id,
+                'title' => 'Pengajuan Koreksi Presensi',
+                'message' => Auth::user()->name . ' mengajukan koreksi presensi untuk tanggal ' . Carbon::parse($request->date)->isoFormat('D MMMM YYYY') . '.',
+            ]);
+        }
+
+        return back()->with('success', 'Pengajuan koreksi presensi berhasil dikirim dan menunggu persetujuan pembimbing.');
+    }
+
     // ==========================================
-    // SUPERVISOR ATTENDANCE MONITORING
+    // SUPERVISOR ATTENDANCE MONITORING & CORRECTIONS
     // ==========================================
 
     public function supervisorIndex(Request $request)
     {
-        $supervisorId = Auth::id();
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
         $date = $request->input('date', Carbon::today()->format('Y-m-d'));
 
         $interns = User::where('role', 'intern')
-            ->whereHas('internProfile', function ($q) use ($supervisorId) {
-                $q->where('supervisor_id', $supervisorId);
+            ->whereHas('internProfile', function ($q) use ($supervisorIds) {
+                $q->whereIn('supervisor_id', $supervisorIds);
             })
             ->with(['internProfile.division', 'attendances' => function ($q) use ($date) {
                 $q->whereDate('date', $date);
             }])
             ->get();
 
-        return view('supervisor.attendance.index', compact('interns', 'date'));
+        $pendingCorrections = \App\Models\AttendanceCorrection::with('intern.internProfile.division')
+            ->whereIn('supervisor_id', $supervisorIds)
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+
+        return view('supervisor.attendance.index', compact('interns', 'date', 'pendingCorrections'));
+    }
+
+    public function approveCorrection(Request $request, $id)
+    {
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $correction = \App\Models\AttendanceCorrection::where('id', $id)
+            ->whereIn('supervisor_id', $supervisorIds)
+            ->firstOrFail();
+
+        $this->applyCorrectionApproval($correction, $request->reviewer_note);
+
+        return back()->with('success', 'Koreksi presensi disetujui dan data presensi telah diperbarui.');
+    }
+
+    public function rejectCorrection(Request $request, $id)
+    {
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $correction = \App\Models\AttendanceCorrection::where('id', $id)
+            ->whereIn('supervisor_id', $supervisorIds)
+            ->firstOrFail();
+
+        $correction->update([
+            'status' => 'rejected',
+            'reviewer_id' => Auth::id(),
+            'reviewer_note' => $request->reviewer_note,
+            'reviewed_at' => Carbon::now(),
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $correction->intern_id,
+            'title' => 'Koreksi Presensi Ditolak',
+            'message' => 'Pengajuan koreksi presensi tanggal ' . Carbon::parse($correction->date)->isoFormat('D MMMM YYYY') . ' ditolak.',
+        ]);
+
+        return back()->with('success', 'Pengajuan koreksi presensi ditolak.');
     }
 
     // ==========================================
-    // ADMIN ATTENDANCE MONITORING
+    // ADMIN ATTENDANCE MONITORING, EXPORT & OVERRIDE
     // ==========================================
 
     public function adminIndex(Request $request)
@@ -258,7 +346,7 @@ class AttendanceController extends Controller
             });
         }
 
-        $attendances = $query->latest('check_in_time')->paginate(20);
+        $attendances = $query->latest('check_in_time')->paginate(20)->withQueryString();
         $divisions = Division::all();
 
         // Today Summary Counters
@@ -267,6 +355,11 @@ class AttendanceController extends Controller
         $totalWfoToday = Attendance::whereDate('date', $date)->where('work_location', 'WFO')->count();
         $totalWfhToday = Attendance::whereDate('date', $date)->where('work_location', 'WFH')->count();
         $totalLateToday = Attendance::whereDate('date', $date)->where('status', 'late')->count();
+
+        $pendingCorrections = \App\Models\AttendanceCorrection::with(['intern.internProfile.division', 'supervisor'])
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
 
         return view('admin.attendance.index', compact(
             'attendances',
@@ -277,7 +370,125 @@ class AttendanceController extends Controller
             'totalPresentToday',
             'totalWfoToday',
             'totalWfhToday',
-            'totalLateToday'
+            'totalLateToday',
+            'pendingCorrections'
         ));
+    }
+
+    public function exportMonthlyExcel(Request $request)
+    {
+        $month = $request->input('month', Carbon::now()->format('Y-m'));
+        $divisionId = $request->input('division_id');
+        $startOfMonth = Carbon::parse($month . '-01')->startOfMonth();
+        $endOfMonth = Carbon::parse($month . '-01')->endOfMonth();
+
+        $query = Attendance::with(['intern.internProfile.division', 'intern.internProfile.supervisor'])
+            ->whereBetween('date', [$startOfMonth->format('Y-m-d'), $endOfMonth->format('Y-m-d')]);
+
+        if ($divisionId) {
+            $query->whereHas('intern.internProfile', function ($q) use ($divisionId) {
+                $q->where('division_id', $divisionId);
+            });
+        }
+
+        $rows = $query->orderBy('date')->orderBy('check_in_time')->get();
+        $filename = "rekap_presensi_{$month}.csv";
+
+        return response()->streamDownload(function () use ($rows) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, [
+                'Tanggal',
+                'Nama Peserta',
+                'Email',
+                'Divisi',
+                'Pembimbing',
+                'Lokasi Kerja',
+                'Check-In',
+                'Check-Out',
+                'Status',
+                'Metode',
+                'Jarak (m)',
+            ]);
+
+            foreach ($rows as $att) {
+                fputcsv($handle, [
+                    $att->date?->format('Y-m-d') ?? '-',
+                    $att->intern?->name ?? '-',
+                    $att->intern?->email ?? '-',
+                    $att->intern?->internProfile?->division?->name ?? '-',
+                    $att->intern?->internProfile?->supervisor?->name ?? '-',
+                    $att->work_location,
+                    $att->check_in_time ?? '-',
+                    $att->check_out_time ?? '-',
+                    $att->status,
+                    $att->check_in_method ?? 'geofence',
+                    $att->check_in_distance_meters ?? '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    public function adminApproveCorrection(Request $request, $id)
+    {
+        $correction = \App\Models\AttendanceCorrection::findOrFail($id);
+        $this->applyCorrectionApproval($correction, $request->reviewer_note ?: 'Disetujui oleh Admin HR.');
+
+        return back()->with('success', 'Koreksi presensi berhasil disetujui oleh Admin HR.');
+    }
+
+    public function adminRejectCorrection(Request $request, $id)
+    {
+        $correction = \App\Models\AttendanceCorrection::findOrFail($id);
+        $correction->update([
+            'status' => 'rejected',
+            'reviewer_id' => Auth::id(),
+            'reviewer_note' => $request->reviewer_note ?: 'Ditolak oleh Admin HR.',
+            'reviewed_at' => Carbon::now(),
+        ]);
+
+        return back()->with('success', 'Koreksi presensi ditolak oleh Admin HR.');
+    }
+
+    private function applyCorrectionApproval(\App\Models\AttendanceCorrection $correction, ?string $note): void
+    {
+        $dateStr = $correction->date instanceof Carbon
+            ? $correction->date->format('Y-m-d')
+            : Carbon::parse($correction->date)->format('Y-m-d');
+
+        $attendance = Attendance::firstOrNew([
+            'intern_id' => $correction->intern_id,
+            'date' => $dateStr,
+        ]);
+
+        $attendance->work_location = $correction->work_location;
+        if ($correction->requested_check_in) {
+            $attendance->check_in_time = $correction->requested_check_in . ':00';
+        }
+        if ($correction->requested_check_out) {
+            $attendance->check_out_time = $correction->requested_check_out . ':00';
+        }
+        if (empty($attendance->status)) {
+            $attendance->status = 'present';
+        }
+        $attendance->notes = trim(($attendance->notes ? $attendance->notes . ' | ' : '') . 'Dikoreksi: ' . $correction->reason);
+        $attendance->save();
+
+        $correction->update([
+            'status' => 'approved',
+            'reviewer_id' => Auth::id(),
+            'reviewer_note' => $note,
+            'reviewed_at' => Carbon::now(),
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $correction->intern_id,
+            'title' => 'Koreksi Presensi Disetujui',
+            'message' => 'Pengajuan koreksi presensi tanggal ' . Carbon::parse($dateStr)->isoFormat('D MMMM YYYY') . ' telah disetujui.',
+        ]);
     }
 }

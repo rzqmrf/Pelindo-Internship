@@ -103,5 +103,32 @@
             </table>
         </div>
     </div>
+
+    @if(isset($pendingCorrections) && $pendingCorrections->isNotEmpty())
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <h2 class="text-lg font-extrabold text-slate-900">Antrean Koreksi Presensi ({{ $pendingCorrections->count() }})</h2>
+        <div class="space-y-3">
+            @foreach($pendingCorrections as $corr)
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="font-bold text-slate-900 text-sm">{{ $corr->intern?->name ?? '-' }} &bull; {{ $corr->date?->format('d M Y') }}</p>
+                        <p class="text-xs text-slate-600">Jenis: <span class="font-semibold">{{ $corr->correction_type }}</span> | Masuk: {{ $corr->requested_check_in ?? '-' }} | Pulang: {{ $corr->requested_check_out ?? '-' }}</p>
+                        <p class="text-xs text-slate-500">{{ $corr->reason }}</p>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <form action="{{ route('supervisor.attendance.corrections.approve', $corr->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Setujui</button>
+                        </form>
+                        <form action="{{ route('supervisor.attendance.corrections.reject', $corr->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold">Tolak</button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

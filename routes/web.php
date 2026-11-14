@@ -14,6 +14,7 @@ use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AllowanceClaimController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\MentorController;
 use App\Http\Controllers\SuperAdminController;
 
 // Redirect Root to Login or Dashboard
@@ -114,6 +115,8 @@ Route::middleware(['auth'])->group(function () {
         // Manage Interns (Dedicated Full Pages)
         Route::middleware(['permission:interns.manage'])->group(function () {
             Route::get('/interns', [AdminController::class, 'interns'])->name('interns.index');
+            Route::get('/interns/import-template', [AdminController::class, 'downloadImportTemplate'])->name('interns.import_template');
+            Route::post('/interns/import', [AdminController::class, 'importInterns'])->name('interns.import');
             Route::get('/interns/create', [AdminController::class, 'createIntern'])->name('interns.create');
             Route::post('/interns', [AdminController::class, 'storeIntern'])->name('interns.store');
             Route::get('/interns/{id}', [AdminController::class, 'showIntern'])->name('interns.show');
@@ -142,10 +145,16 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware(['permission:monitoring.view'])->group(function () {
             Route::get('/monitoring', [AdminController::class, 'monitoring'])->name('monitoring');
             Route::get('/monitoring/export-rekap', [AdminController::class, 'exportDivisionRekap'])->name('monitoring.export_rekap');
+            Route::get('/leaves', [LeaveRequestController::class, 'adminIndex'])->name('leaves.index');
+            Route::post('/leaves/{id}/approve', [LeaveRequestController::class, 'adminApprove'])->name('leaves.approve');
+            Route::post('/leaves/{id}/reject', [LeaveRequestController::class, 'adminReject'])->name('leaves.reject');
         });
-        Route::get('/attendance', [AttendanceController::class, 'adminIndex'])
-            ->middleware('permission:attendance.view')
-            ->name('attendance.index');
+        Route::middleware(['permission:attendance.view'])->group(function () {
+            Route::get('/attendance', [AttendanceController::class, 'adminIndex'])->name('attendance.index');
+            Route::get('/attendance/export-monthly', [AttendanceController::class, 'exportMonthlyExcel'])->name('attendance.export_monthly');
+            Route::post('/attendance/corrections/{id}/approve', [AttendanceController::class, 'adminApproveCorrection'])->name('attendance.corrections.approve');
+            Route::post('/attendance/corrections/{id}/reject', [AttendanceController::class, 'adminRejectCorrection'])->name('attendance.corrections.reject');
+        });
 
         // Manage Announcements
         Route::middleware(['permission:announcements.manage'])->group(function () {
@@ -172,19 +181,24 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Intern Exit Satisfaction Survey Recap
-        Route::get('/surveys', [\App\Http\Controllers\InternSurveyController::class, 'adminIndex'])
-            ->middleware('permission:surveys.view')
-            ->name('surveys.index');
+        Route::middleware(['permission:surveys.view'])->group(function () {
+            Route::get('/surveys', [\App\Http\Controllers\InternSurveyController::class, 'adminIndex'])->name('surveys.index');
+            Route::get('/surveys/export', [\App\Http\Controllers\InternSurveyController::class, 'exportCsv'])->name('surveys.export');
+        });
     });
 
     // 2. Supervisor Routes
     Route::middleware(['role:supervisor'])->prefix('supervisor')->name('supervisor.')->group(function () {
         Route::get('/dashboard', [SupervisorController::class, 'dashboard'])->name('dashboard');
+        Route::post('/delegation', [SupervisorController::class, 'updateDelegation'])->name('delegation.update');
         Route::get('/interns', [SupervisorController::class, 'myInterns'])->name('interns');
         Route::get('/activities', [SupervisorController::class, 'activities'])->name('activities');
+        Route::post('/activities/bulk-approve', [SupervisorController::class, 'bulkApprove'])->name('activities.bulk_approve');
         Route::post('/activities/{id}/approve', [SupervisorController::class, 'approve'])->name('activities.approve');
         Route::get('/statistics', [SupervisorController::class, 'statistics'])->name('statistics');
         Route::get('/attendance', [AttendanceController::class, 'supervisorIndex'])->name('attendance.index');
+        Route::post('/attendance/corrections/{id}/approve', [AttendanceController::class, 'approveCorrection'])->name('attendance.corrections.approve');
+        Route::post('/attendance/corrections/{id}/reject', [AttendanceController::class, 'rejectCorrection'])->name('attendance.corrections.reject');
         
         // Leave request approvals
         Route::get('/leaves', [LeaveRequestController::class, 'supervisorIndex'])->name('leaves.index');
@@ -202,6 +216,19 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/assessments/{intern_id}', [AssessmentController::class, 'storeOrUpdate'])->name('assessments.store');
     });
 
+    // 2B. Mentor Routes
+    Route::middleware(['role:mentor'])->prefix('mentor')->name('mentor.')->group(function () {
+        Route::get('/dashboard', [MentorController::class, 'dashboard'])->name('dashboard');
+        Route::get('/interns', [MentorController::class, 'myInterns'])->name('interns');
+        Route::get('/activities', [MentorController::class, 'activities'])->name('activities');
+        Route::post('/activities/{id}/review', [MentorController::class, 'reviewActivity'])->name('activities.review');
+        Route::get('/tasks', [MentorController::class, 'tasks'])->name('tasks');
+        Route::post('/tasks', [MentorController::class, 'storeTask'])->name('tasks.store');
+        Route::post('/tasks/{id}/review', [MentorController::class, 'reviewTask'])->name('tasks.review');
+        Route::get('/notes', [MentorController::class, 'mentoringNotes'])->name('notes');
+        Route::post('/notes', [MentorController::class, 'storeMentoringNote'])->name('notes.store');
+    });
+
     // 3. Intern Routes
     Route::middleware(['role:intern'])->prefix('intern')->name('intern.')->group(function () {
         Route::get('/dashboard', [InternActivityController::class, 'dashboard'])->name('dashboard');
@@ -210,15 +237,22 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/activities', [InternActivityController::class, 'store'])->name('activities.store');
         Route::get('/activities/{id}/edit', [InternActivityController::class, 'edit'])->name('activities.edit');
         Route::put('/activities/{id}', [InternActivityController::class, 'update'])->name('activities.update');
+        Route::delete('/activities/{id}', [InternActivityController::class, 'destroy'])->name('activities.destroy');
+
+        // Tasks & Mentoring Notes
+        Route::get('/tasks', [InternActivityController::class, 'tasks'])->name('tasks.index');
+        Route::post('/tasks/{id}/submit', [InternActivityController::class, 'submitTask'])->name('tasks.submit');
 
         // Attendance & Geofencing
         Route::get('/attendance', [AttendanceController::class, 'internIndex'])->name('attendance.index');
         Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn'])->name('attendance.checkin');
         Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut'])->name('attendance.checkout');
+        Route::post('/attendance/correction', [AttendanceController::class, 'requestCorrection'])->name('attendance.correction');
 
         // Leave request submissions
         Route::get('/leaves', [LeaveRequestController::class, 'index'])->name('leaves.index');
         Route::post('/leaves', [LeaveRequestController::class, 'store'])->name('leaves.store');
+        Route::delete('/leaves/{id}/cancel', [LeaveRequestController::class, 'cancel'])->name('leaves.cancel');
 
         // Allowance Claims
         Route::get('/allowance', [AllowanceClaimController::class, 'index'])->name('allowance.index');

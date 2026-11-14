@@ -168,6 +168,17 @@
                                 <span>Edit</span>
                             </a>
                             @endif
+
+                            @if($act->status === 'draft')
+                            <form action="{{ route('intern.activities.destroy', $act->id) }}" method="POST" class="inline" onsubmit="return confirm('Hapus draft logbook ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold rounded-xl text-xs transition inline-flex items-center space-x-1">
+                                    <i class="fa-regular fa-trash-can text-xs"></i>
+                                    <span>Hapus</span>
+                                </button>
+                            </form>
+                            @endif
                         </td>
                     </tr>
                     @empty

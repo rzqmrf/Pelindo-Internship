@@ -90,6 +90,7 @@ class Role extends Model
         return [
             'admin' => 'Portal Manajemen / Operasional HR',
             'supervisor' => 'Portal Pembimbing Lapangan',
+            'mentor' => 'Portal Mentor Teknis',
             'intern' => 'Portal Peserta Magang',
             'superadmin' => 'Portal Pengembang Sistem (Superadmin)',
         ];
@@ -134,9 +135,18 @@ class Role extends Model
             [
                 'slug' => 'supervisor',
                 'name' => 'Pembimbing',
-                'description' => 'Mentor unit kerja yang memvalidasi logbook harian, izin, klaim uang saku, dan nilai akhir peserta.',
+                'description' => 'Pembimbing unit kerja yang memvalidasi izin, uang saku, koreksi presensi, dan nilai akhir peserta.',
                 'base_portal' => 'supervisor',
                 'badge_color' => 'sky',
+                'permissions' => [],
+                'is_system' => true,
+            ],
+            [
+                'slug' => 'mentor',
+                'name' => 'Mentor Teknis',
+                'description' => 'Pendamping teknis harian yang memantau logbook, memberi tugas/milestone, dan mencatat sesi mentoring.',
+                'base_portal' => 'mentor',
+                'badge_color' => 'emerald',
                 'permissions' => [],
                 'is_system' => true,
             ],
@@ -176,7 +186,7 @@ class Role extends Model
             }
 
             $rows = Cache::rememberForever(self::CACHE_KEY, function () {
-                return static::orderByRaw("CASE slug WHEN 'superadmin' THEN 1 WHEN 'admin' THEN 2 WHEN 'supervisor' THEN 3 WHEN 'intern' THEN 4 ELSE 5 END")
+                return static::orderByRaw("CASE slug WHEN 'superadmin' THEN 1 WHEN 'admin' THEN 2 WHEN 'supervisor' THEN 3 WHEN 'mentor' THEN 4 WHEN 'intern' THEN 5 ELSE 6 END")
                     ->orderBy('name')
                     ->get();
             });

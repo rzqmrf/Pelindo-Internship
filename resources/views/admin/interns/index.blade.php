@@ -14,6 +14,24 @@
         action-label="Tambah Peserta Baru"
         action-icon="fa-solid fa-user-plus" />
 
+    <!-- Import Massal CSV -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-xs">
+        <div>
+            <h2 class="text-sm font-extrabold text-slate-900">Import Massal Peserta Magang (CSV)</h2>
+            <p class="text-xs text-slate-500">Tambahkan banyak peserta sekaligus per batch menggunakan file CSV.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.interns.import_template') }}" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                <i class="fa-solid fa-download mr-1"></i> Unduh Template CSV
+            </a>
+            <form action="{{ route('admin.interns.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
+                @csrf
+                <input type="file" name="csv_file" accept=".csv,.txt" required class="text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#005B9C]">
+                <button type="submit" class="px-4 py-2 bg-[#005B9C] hover:bg-[#004A80] text-white rounded-xl text-xs font-bold transition">Import CSV</button>
+            </form>
+        </div>
+    </div>
+
     <!-- 4 KPI Stat Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <x-stat-card

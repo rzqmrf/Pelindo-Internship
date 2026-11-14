@@ -131,10 +131,12 @@ class AdminController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%");
-            })->orWhere('student_id_number', 'like', "%{$search}%")
-              ->orWhere('institution', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('student_id_number', 'like', "%{$search}%")
+                  ->orWhere('institution', 'like', "%{$search}%");
+            });
         }
 
         if ($request->filled('division_id')) {
@@ -145,7 +147,7 @@ class AdminController extends Controller
             $query->where('status', $request->status);
         }
 
-        $interns = $query->latest()->paginate(10);
+        $interns = $query->latest()->paginate(10)->withQueryString();
         $divisions = Division::all();
         $supervisors = User::where('role', 'supervisor')->get();
 
@@ -169,12 +171,13 @@ class AdminController extends Controller
     {
         $divisions = Division::all();
         $supervisors = User::where('role', 'supervisor')->where('is_active', true)->get();
-        return view('admin.interns.create', compact('divisions', 'supervisors'));
+        $mentors = User::where('role', 'mentor')->where('is_active', true)->orderBy('name')->get();
+        return view('admin.interns.create', compact('divisions', 'supervisors', 'mentors'));
     }
 
     public function showIntern($id)
     {
-        $intern = InternProfile::with(['user', 'division', 'supervisor'])->findOrFail($id);
+        $intern = InternProfile::with(['user', 'division', 'supervisor', 'mentor'])->findOrFail($id);
         $user = $intern->user;
         $attendances = Attendance::where('intern_id', $user->id)->latest()->take(10)->get();
         $activities = DailyActivity::where('intern_id', $user->id)->latest()->take(10)->get();
@@ -186,10 +189,11 @@ class AdminController extends Controller
 
     public function editIntern($id)
     {
-        $intern = InternProfile::with(['user', 'division', 'supervisor'])->findOrFail($id);
+        $intern = InternProfile::with(['user', 'division', 'supervisor', 'mentor'])->findOrFail($id);
         $divisions = Division::all();
         $supervisors = User::where('role', 'supervisor')->where('is_active', true)->get();
-        return view('admin.interns.edit', compact('intern', 'divisions', 'supervisors'));
+        $mentors = User::where('role', 'mentor')->where('is_active', true)->orderBy('name')->get();
+        return view('admin.interns.edit', compact('intern', 'divisions', 'supervisors', 'mentors'));
     }
 
     public function storeIntern(Request $request)
@@ -200,6 +204,7 @@ class AdminController extends Controller
             'phone' => 'nullable|string|max:20',
             'division_id' => 'required|exists:divisions,id',
             'supervisor_id' => 'required|exists:users,id',
+            'mentor_id' => 'nullable|exists:users,id',
             'student_id_number' => 'required|string|max:50',
             'nik_number' => 'nullable|string|max:30',
             'institution' => 'required|string|max:255',
@@ -239,6 +244,7 @@ class AdminController extends Controller
             'user_id' => $user->id,
             'division_id' => $request->division_id,
             'supervisor_id' => $request->supervisor_id,
+            'mentor_id' => $request->mentor_id ?: null,
             'student_id_number' => $request->student_id_number,
             'nik_number' => $request->nik_number,
             'institution' => $request->institution,
@@ -270,6 +276,7 @@ class AdminController extends Controller
             'phone' => 'nullable|string|max:20',
             'division_id' => 'required|exists:divisions,id',
             'supervisor_id' => 'required|exists:users,id',
+            'mentor_id' => 'nullable|exists:users,id',
             'student_id_number' => 'required|string|max:50',
             'nik_number' => 'nullable|string|max:30',
             'institution' => 'required|string|max:255',
@@ -298,6 +305,7 @@ class AdminController extends Controller
         $intern->update([
             'division_id' => $request->division_id,
             'supervisor_id' => $request->supervisor_id,
+            'mentor_id' => $request->mentor_id ?: null,
             'student_id_number' => $request->student_id_number,
             'nik_number' => $request->nik_number,
             'institution' => $request->institution,
@@ -316,6 +324,116 @@ class AdminController extends Controller
         AuditLogger::record('intern.update', 'users', "Admin HR memperbarui data peserta magang: {$user->name}.", $user);
 
         return redirect()->route('admin.interns.index')->with('success', 'Data peserta magang berhasil diperbarui.');
+    }
+
+    public function downloadImportTemplate()
+    {
+        $filename = 'template_import_intern_pelindo.csv';
+
+        return response()->streamDownload(function () {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, [
+                'name',
+                'email',
+                'student_id_number',
+                'institution',
+                'major',
+                'division_name',
+                'supervisor_email',
+                'mentor_email',
+                'start_date',
+                'end_date',
+                'password',
+            ]);
+            fputcsv($handle, [
+                'Contoh Peserta',
+                'peserta.contoh@pelindo.co.id',
+                '2105123456',
+                'Institut Teknologi Sepuluh Nopember',
+                'Teknik Informatika',
+                'Divisi Teknologi Informasi',
+                'supervisor@pelindo.co.id',
+                '',
+                now()->format('Y-m-d'),
+                now()->addMonths(3)->format('Y-m-d'),
+                'Pelindo2026!',
+            ]);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
+
+    public function importInterns(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:5120',
+        ]);
+
+        $path = $request->file('csv_file')->getRealPath();
+        $rows = array_map('str_getcsv', file($path));
+
+        if (count($rows) < 2) {
+            return back()->with('error', 'File CSV kosong atau tidak memiliki data baris.');
+        }
+
+        $header = array_map(fn ($h) => trim(preg_replace('/^\xEF\xBB\xBF/', '', (string) $h)), array_shift($rows));
+        $imported = 0;
+        $skipped = 0;
+
+        foreach ($rows as $row) {
+            if (count($row) !== count($header)) {
+                $skipped++;
+                continue;
+            }
+
+            $data = array_combine($header, array_map('trim', $row));
+            if (empty($data['email']) || empty($data['name']) || User::where('email', $data['email'])->exists()) {
+                $skipped++;
+                continue;
+            }
+
+            $division = Division::where('name', 'like', $data['division_name'] ?? '')->first() ?? Division::first();
+            $supervisor = User::where('email', $data['supervisor_email'] ?? '')->where('role', 'supervisor')->first()
+                ?? User::where('role', 'supervisor')->first();
+            $mentor = !empty($data['mentor_email'])
+                ? User::where('email', $data['mentor_email'])->where('role', 'mentor')->first()
+                : null;
+
+            if (!$division || !$supervisor) {
+                $skipped++;
+                continue;
+            }
+
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'role' => 'intern',
+                'password' => Hash::make(!empty($data['password']) ? $data['password'] : 'Pelindo2026!'),
+                'is_active' => true,
+            ]);
+
+            InternProfile::create([
+                'user_id' => $user->id,
+                'division_id' => $division->id,
+                'supervisor_id' => $supervisor->id,
+                'mentor_id' => $mentor?->id,
+                'student_id_number' => $data['student_id_number'] ?: '-',
+                'institution' => $data['institution'] ?: '-',
+                'major' => $data['major'] ?: '-',
+                'start_date' => !empty($data['start_date']) ? $data['start_date'] : now()->toDateString(),
+                'end_date' => !empty($data['end_date']) ? $data['end_date'] : now()->addMonths(3)->toDateString(),
+                'status' => 'active',
+            ]);
+
+            $imported++;
+        }
+
+        AuditLogger::record('intern.import', 'users', "Admin HR mengimpor {$imported} peserta magang (dilewati: {$skipped}).");
+
+        return redirect()->route('admin.interns.index')
+            ->with('success', "Import selesai: {$imported} peserta berhasil ditambahkan" . ($skipped > 0 ? ", {$skipped} baris dilewati." : '.'));
     }
 
     public function deleteIntern($id)

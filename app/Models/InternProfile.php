@@ -13,6 +13,7 @@ class InternProfile extends Model
         'user_id',
         'division_id',
         'supervisor_id',
+        'mentor_id',
         'student_id_number',
         'nik_number',
         'institution',
@@ -46,5 +47,10 @@ class InternProfile extends Model
     public function supervisor()
     {
         return $this->belongsTo(User::class, 'supervisor_id');
+    }
+
+    public function mentor()
+    {
+        return $this->belongsTo(User::class, 'mentor_id');
     }
 }

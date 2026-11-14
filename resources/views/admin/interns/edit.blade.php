@@ -153,6 +153,15 @@
                     @endforeach
                 </x-form-select>
 
+                <x-form-select name="mentor_id" label="Mentor Teknis (Opsional)">
+                    <option value="">-- Tidak Ditentukan --</option>
+                    @foreach(($mentors ?? []) as $mnt)
+                    <option value="{{ $mnt->id }}" {{ old('mentor_id', $intern->mentor_id) == $mnt->id ? 'selected' : '' }}>
+                        {{ $mnt->name }} ({{ $mnt->email }})
+                    </option>
+                    @endforeach
+                </x-form-select>
+
                 <x-form-select name="status" label="Status Keaktifan *" required>
                     <option value="active" {{ old('status', $intern->status) == 'active' ? 'selected' : '' }}>ACTIVE (Aktif Magang)</option>
                     <option value="completed" {{ old('status', $intern->status) == 'completed' ? 'selected' : '' }}>COMPLETED (Selesai Magang)</option>

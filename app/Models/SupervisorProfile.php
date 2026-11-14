@@ -15,6 +15,14 @@ class SupervisorProfile extends Model
         'employee_id_number',
         'position_title',
         'phone',
+        'delegate_supervisor_id',
+        'delegation_start_date',
+        'delegation_end_date',
+    ];
+
+    protected $casts = [
+        'delegation_start_date' => 'date',
+        'delegation_end_date' => 'date',
     ];
 
     public function user()
@@ -25,5 +33,10 @@ class SupervisorProfile extends Model
     public function division()
     {
         return $this->belongsTo(Division::class, 'division_id');
+    }
+
+    public function delegateSupervisor()
+    {
+        return $this->belongsTo(User::class, 'delegate_supervisor_id');
     }
 }

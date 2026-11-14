@@ -311,4 +311,70 @@
 
     document.addEventListener('DOMContentLoaded', detectGPS);
 </script>
+
+<div class="mt-8 bg-white rounded-3xl border border-slate-200/80 p-6 shadow-xs space-y-6">
+    <div>
+        <h2 class="text-lg font-extrabold text-slate-900">Pengajuan Koreksi Presensi</h2>
+        <p class="text-xs text-slate-500">Gunakan form ini jika Anda lupa check-in/check-out atau terkendala GPS pada tanggal sebelumnya.</p>
+    </div>
+
+    <form action="{{ route('intern.attendance.correction') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @csrf
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Tanggal Presensi</label>
+            <input type="date" name="date" max="{{ date('Y-m-d') }}" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Jenis Koreksi</label>
+            <select name="correction_type" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                <option value="missed_checkout">Lupa Check-Out</option>
+                <option value="missed_checkin">Lupa Check-In</option>
+                <option value="gps_issue">Kendala GPS / Lokasi</option>
+                <option value="both">Check-In &amp; Check-Out</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Lokasi Kerja</label>
+            <select name="work_location" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                <option value="WFO">WFO</option>
+                <option value="WFH">WFH</option>
+                <option value="WFA">WFA</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Jam Check-In (Opsional)</label>
+            <input type="time" name="requested_check_in" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Jam Check-Out (Opsional)</label>
+            <input type="time" name="requested_check_out" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Bukti Pendukung (Opsional)</label>
+            <input type="file" name="attachment" class="w-full text-xs text-slate-600">
+        </div>
+        <div class="md:col-span-3">
+            <label class="block text-xs font-bold text-slate-600 mb-1">Alasan Koreksi (min. 10 karakter)</label>
+            <textarea name="reason" rows="2" required class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm" placeholder="Jelaskan kendala presensi yang dialami..."></textarea>
+        </div>
+        <div class="md:col-span-3">
+            <button type="submit" class="px-5 py-2.5 bg-[#005B9C] text-white rounded-xl text-xs font-bold">Kirim Pengajuan Koreksi</button>
+        </div>
+    </form>
+
+    @if(isset($corrections) && $corrections->isNotEmpty())
+        <div class="pt-4 border-t border-slate-100 space-y-2">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Riwayat Pengajuan Koreksi</h3>
+            @foreach($corrections as $corr)
+                <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                    <div>
+                        <span class="font-bold text-slate-900">{{ $corr->date?->format('d M Y') }}</span>
+                        <span class="text-slate-500 ml-2">{{ $corr->correction_type }} &bull; {{ $corr->reason }}</span>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-full font-bold uppercase {{ $corr->status === 'approved' ? 'bg-emerald-100 text-emerald-700' : ($corr->status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700') }}">{{ $corr->status }}</span>
+                </div>
+            @endforeach
+        </div>
+    @endif
+</div>
 @endsection

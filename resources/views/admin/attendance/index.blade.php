@@ -138,5 +138,50 @@
         </div>
         @endif
     </x-card>
+
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-base font-extrabold text-slate-900">Ekspor Rekap Presensi Bulanan</h2>
+                <p class="text-xs text-slate-500">Unduh laporan presensi bulanan seluruh peserta atau per divisi dalam format CSV.</p>
+            </div>
+            <form action="{{ route('admin.attendance.export_monthly') }}" method="GET" class="flex flex-wrap gap-2 items-center">
+                <input type="month" name="month" value="{{ substr($date ?? date('Y-m-d'), 0, 7) }}" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold">
+                <select name="division_id" class="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold">
+                    <option value="">Semua Divisi</option>
+                    @foreach($divisions as $div)
+                        <option value="{{ $div->id }}" {{ ($divisionId ?? '') == $div->id ? 'selected' : '' }}>{{ $div->name }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Ekspor CSV Bulanan</button>
+            </form>
+        </div>
+    </div>
+
+    @if(isset($pendingCorrections) && $pendingCorrections->isNotEmpty())
+    <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-xs space-y-4">
+        <h2 class="text-base font-extrabold text-slate-900">Koreksi Presensi Menunggu (Override Admin HR)</h2>
+        <div class="space-y-3">
+            @foreach($pendingCorrections as $corr)
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="font-bold text-slate-900 text-sm">{{ $corr->intern?->name ?? '-' }} ({{ $corr->intern?->internProfile?->division?->name ?? '-' }})</p>
+                        <p class="text-xs text-slate-600">Tanggal: {{ $corr->date?->format('d M Y') }} &bull; {{ $corr->correction_type }} &bull; {{ $corr->reason }}</p>
+                    </div>
+                    <div class="flex gap-2 shrink-0">
+                        <form action="{{ route('admin.attendance.corrections.approve', $corr->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Setujui</button>
+                        </form>
+                        <form action="{{ route('admin.attendance.corrections.reject', $corr->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold">Tolak</button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
 </div>
 @endsection

@@ -162,6 +162,15 @@
                     @endforeach
                 </x-form-select>
 
+                <x-form-select name="mentor_id" label="Mentor Teknis (Opsional)">
+                    <option value="">-- Tidak Ditentukan --</option>
+                    @foreach(($mentors ?? []) as $mnt)
+                    <option value="{{ $mnt->id }}" {{ old('mentor_id') == $mnt->id ? 'selected' : '' }}>
+                        {{ $mnt->name }} ({{ $mnt->email }})
+                    </option>
+                    @endforeach
+                </x-form-select>
+
                 <x-form-input
                     type="password"
                     name="password"

@@ -179,6 +179,10 @@
                             <i class="fa-solid fa-eye text-base w-6 text-center"></i>
                             <span>Monitoring Logbook</span>
                         </a>
+                        <a href="{{ route('admin.leaves.index') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('admin.leaves*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <i class="fa-regular fa-calendar-check text-base w-6 text-center"></i>
+                            <span>Izin Lintas Divisi</span>
+                        </a>
                     @endif
 
                     @if(Auth::user()->hasPermission('announcements.manage'))
@@ -254,6 +258,35 @@
                     </a>
                 @endif
 
+                @if(Auth::user()->isMentor())
+                    <p class="px-3 text-xs font-bold tracking-wider uppercase text-slate-400 mb-2 mt-2">PORTAL MENTOR</p>
+
+                    <a href="{{ route('mentor.dashboard') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('mentor.dashboard') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-house text-base w-6 text-center"></i>
+                        <span>Dashboard Mentor</span>
+                    </a>
+
+                    <a href="{{ route('mentor.interns') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('mentor.interns*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-user-group text-base w-6 text-center"></i>
+                        <span>Peserta Bimbingan</span>
+                    </a>
+
+                    <a href="{{ route('mentor.activities') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('mentor.activities*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-list-check text-base w-6 text-center"></i>
+                        <span>Review Logbook</span>
+                    </a>
+
+                    <a href="{{ route('mentor.tasks') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('mentor.tasks*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-bullseye text-base w-6 text-center"></i>
+                        <span>Tugas &amp; Milestone</span>
+                    </a>
+
+                    <a href="{{ route('mentor.notes') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('mentor.notes*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-comments text-base w-6 text-center"></i>
+                        <span>Catatan Mentoring</span>
+                    </a>
+                @endif
+
                 @if(Auth::user()->isIntern())
                     <p class="px-3 text-xs font-bold tracking-wider uppercase text-slate-400 mb-2 mt-2">MENU UTAMA</p>
 
@@ -275,6 +308,11 @@
                     <a href="{{ route('intern.activities.index') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('intern.activities.index') || request()->routeIs('intern.activities.edit') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
                         <i class="fa-regular fa-clock text-base w-6 text-center"></i>
                         <span>Riwayat Logbook</span>
+                    </a>
+
+                    <a href="{{ route('intern.tasks.index') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('intern.tasks*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">
+                        <i class="fa-solid fa-bullseye text-base w-6 text-center"></i>
+                        <span>Tugas &amp; Mentoring</span>
                     </a>
 
                     <a href="{{ route('intern.leaves.index') }}" class="flex items-center space-x-3.5 px-4 py-3 rounded-xl font-bold text-sm transition {{ request()->routeIs('intern.leaves.index*') ? 'bg-[#005B9C] text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900' }}">

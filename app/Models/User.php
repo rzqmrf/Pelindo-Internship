@@ -47,7 +47,7 @@ class User extends Authenticatable
             return $def->base_portal;
         }
 
-        return in_array($this->role, ['superadmin', 'admin', 'supervisor', 'intern'], true)
+        return in_array($this->role, ['superadmin', 'admin', 'supervisor', 'mentor', 'intern'], true)
             ? $this->role
             : 'admin';
     }
@@ -72,9 +72,39 @@ class User extends Authenticatable
         return $this->role === 'supervisor' || $this->basePortal() === 'supervisor';
     }
 
+    public function isMentor(): bool
+    {
+        return $this->role === 'mentor' || $this->basePortal() === 'mentor';
+    }
+
+    public function usesMentorPortal(): bool
+    {
+        return $this->isMentor();
+    }
+
     public function isIntern(): bool
     {
         return $this->role === 'intern' || $this->basePortal() === 'intern';
+    }
+
+    /**
+     * Mengembalikan daftar ID supervisor yang dapat diakses oleh user ini,
+     * termasuk supervisor lain yang sedang mendelegasikan wewenang aktif hari ini.
+     */
+    public function accessibleSupervisorIds(): array
+    {
+        $today = now()->toDateString();
+        $delegatedIds = SupervisorProfile::where('delegate_supervisor_id', $this->id)
+            ->where(function ($q) use ($today) {
+                $q->whereNull('delegation_start_date')->orWhereDate('delegation_start_date', '<=', $today);
+            })
+            ->where(function ($q) use ($today) {
+                $q->whereNull('delegation_end_date')->orWhereDate('delegation_end_date', '>=', $today);
+            })
+            ->pluck('user_id')
+            ->all();
+
+        return array_values(array_unique(array_merge([$this->id], $delegatedIds)));
     }
 
     public function hasPermission(string $permission): bool
@@ -102,6 +132,7 @@ class User extends Authenticatable
             'superadmin' => 'Superadmin IT',
             'admin' => 'Admin HR',
             'supervisor' => 'Pembimbing',
+            'mentor' => 'Mentor Teknis',
             'intern' => 'Peserta Magang',
             default => ucfirst(str_replace(['_', '-'], ' ', (string) $this->role)),
         };
@@ -118,6 +149,7 @@ class User extends Authenticatable
             'superadmin' => 'bg-slate-900 text-white',
             'admin' => 'bg-blue-100 text-[#005B9C]',
             'supervisor' => 'bg-sky-50 text-sky-800 border border-sky-200',
+            'mentor' => 'bg-emerald-50 text-emerald-800 border border-emerald-200',
             default => 'bg-slate-100 text-slate-700',
         };
     }
@@ -131,6 +163,9 @@ class User extends Authenticatable
         }
         if ($portal === 'supervisor') {
             return route('supervisor.dashboard');
+        }
+        if ($portal === 'mentor') {
+            return route('mentor.dashboard');
         }
         if ($portal === 'intern') {
             return route('intern.dashboard');
@@ -224,6 +259,31 @@ class User extends Authenticatable
     public function auditLogs()
     {
         return $this->hasMany(AuditLog::class, 'user_id');
+    }
+
+    public function mentoredInterns()
+    {
+        return $this->hasMany(InternProfile::class, 'mentor_id');
+    }
+
+    public function internTasks()
+    {
+        return $this->hasMany(InternTask::class, 'intern_id');
+    }
+
+    public function assignedTasks()
+    {
+        return $this->hasMany(InternTask::class, 'assigned_by');
+    }
+
+    public function mentoringNotes()
+    {
+        return $this->hasMany(MentoringNote::class, 'intern_id');
+    }
+
+    public function attendanceCorrections()
+    {
+        return $this->hasMany(AttendanceCorrection::class, 'intern_id');
     }
 }
 

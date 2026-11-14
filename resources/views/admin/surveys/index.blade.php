@@ -11,8 +11,14 @@
                 Evaluasi umpan balik peserta terhadap program magang, kualitas bimbingan mentor, dan fasilitas kerja Pelindo.
             </p>
         </div>
-        <div class="px-4 py-2.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs font-extrabold text-[#005B9C] shrink-0">
-            Total Responden: {{ $totalResponses }} Peserta
+        <div class="flex items-center gap-3 shrink-0">
+            <div class="px-4 py-2.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs font-extrabold text-[#005B9C]">
+                Total Responden: {{ $totalResponses }} Peserta
+            </div>
+            <a href="{{ route('admin.surveys.export', request()->only('division_id')) }}" class="px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold transition inline-flex items-center gap-2">
+                <i class="fa-solid fa-file-csv"></i>
+                <span>Ekspor CSV</span>
+            </a>
         </div>
     </div>
 

@@ -179,6 +179,15 @@
                             <span class="text-xs text-slate-400 font-medium">
                                 {{ $leave->created_at ? $leave->created_at->diffForHumans() : '-' }}
                             </span>
+                            @if($leave->status === 'pending')
+                            <form action="{{ route('intern.leaves.cancel', $leave->id) }}" method="POST" onsubmit="return confirm('Batalkan pengajuan izin ini?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="px-3 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition">
+                                    Batalkan
+                                </button>
+                            </form>
+                            @endif
                         </div>
                     </div>
                     @empty

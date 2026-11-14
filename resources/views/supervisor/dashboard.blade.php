@@ -416,4 +416,32 @@
     });
 </script>
 @endpush
+
+<div class="mt-6 bg-white rounded-3xl border border-slate-200 p-6 shadow-xs">
+    <h3 class="text-base font-extrabold text-slate-900 mb-1">Delegasi Persetujuan Sementara</h3>
+    <p class="text-xs text-slate-500 mb-4">Tunjuk pembimbing pengganti sementara jika Anda sedang cuti atau dinas luar.</p>
+    <form action="{{ route('supervisor.delegation.update') }}" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        @csrf
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Pembimbing Pengganti</label>
+            <select name="delegate_supervisor_id" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+                <option value="">-- Tidak Ada Delegasi --</option>
+                @foreach(($otherSupervisors ?? []) as $spv)
+                    <option value="{{ $spv->id }}" {{ ($supervisorProfile?->delegate_supervisor_id ?? null) == $spv->id ? 'selected' : '' }}>{{ $spv->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Mulai Tanggal</label>
+            <input type="date" name="delegation_start_date" value="{{ $supervisorProfile?->delegation_start_date?->format('Y-m-d') }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-slate-600 mb-1">Sampai Tanggal</label>
+            <input type="date" name="delegation_end_date" value="{{ $supervisorProfile?->delegation_end_date?->format('Y-m-d') }}" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-sm">
+        </div>
+        <div>
+            <button type="submit" class="w-full px-4 py-2 bg-[#005B9C] text-white rounded-xl text-xs font-bold">Simpan Delegasi</button>
+        </div>
+    </form>
+</div>
 @endsection

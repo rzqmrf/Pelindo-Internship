@@ -13,26 +13,26 @@ class SupervisorController extends Controller
 {
     public function dashboard()
     {
-        $supervisorId = Auth::id();
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
 
         // 1. My Interns
-        $myInternsCount = InternProfile::where('supervisor_id', $supervisorId)
+        $myInternsCount = InternProfile::whereIn('supervisor_id', $supervisorIds)
             ->where('status', 'active')
             ->count();
 
         // 2. Pending Approvals Count for supervisor's interns
-        $pendingApprovalsCount = DailyActivity::where('supervisor_id', $supervisorId)
+        $pendingApprovalsCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)
             ->where('status', 'pending')
             ->count();
 
         // 3. Today's Submissions Count
-        $todaysActivitiesCount = DailyActivity::where('supervisor_id', $supervisorId)
+        $todaysActivitiesCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)
             ->whereDate('date', Carbon::today())
             ->count();
 
         // 4. Pending Approval Activities Queue (top 7)
         $pendingQueue = DailyActivity::with(['intern.internProfile'])
-            ->where('supervisor_id', $supervisorId)
+            ->whereIn('supervisor_id', $supervisorIds)
             ->where('status', 'pending')
             ->latest()
             ->take(7)
@@ -40,19 +40,27 @@ class SupervisorController extends Controller
 
         // 5. Activity Timeline (Recent approved/revised/rejected/pending updates)
         $activityTimeline = DailyActivity::with(['intern.internProfile'])
-            ->where('supervisor_id', $supervisorId)
+            ->whereIn('supervisor_id', $supervisorIds)
             ->latest('updated_at')
             ->take(10)
             ->get();
 
         // 6. Supervised Interns Summary List
         $supervisedInterns = InternProfile::with(['user', 'division'])
-            ->where('supervisor_id', $supervisorId)
+            ->whereIn('supervisor_id', $supervisorIds)
             ->where('status', 'active')
             ->get();
 
         // 7. Announcements (Latest 3)
         $announcements = \App\Models\Announcement::with('creator')->latest()->take(3)->get();
+
+        // 8. Delegation info for current supervisor
+        $supervisorProfile = Auth::user()->supervisorProfile;
+        $otherSupervisors = User::where('role', 'supervisor')
+            ->where('is_active', true)
+            ->where('id', '!=', Auth::id())
+            ->orderBy('name')
+            ->get();
 
         return view('supervisor.dashboard', compact(
             'myInternsCount',
@@ -61,32 +69,36 @@ class SupervisorController extends Controller
             'pendingQueue',
             'activityTimeline',
             'supervisedInterns',
-            'announcements'
+            'announcements',
+            'supervisorProfile',
+            'otherSupervisors'
         ));
     }
 
     // List Peserta Bimbingan
     public function myInterns(Request $request)
     {
-        $supervisorId = Auth::id();
-        $query = InternProfile::with(['user.dailyActivities', 'division'])
-            ->where('supervisor_id', $supervisorId);
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $query = InternProfile::with(['user.dailyActivities', 'division', 'mentor'])
+            ->whereIn('supervisor_id', $supervisorIds);
 
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%");
-            })->orWhere('student_id_number', 'like', "%{$search}%")
-              ->orWhere('institution', 'like', "%{$search}%");
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%");
+                })->orWhere('student_id_number', 'like', "%{$search}%")
+                  ->orWhere('institution', 'like', "%{$search}%");
+            });
         }
 
-        $interns = $query->latest()->paginate(10);
+        $interns = $query->latest()->paginate(10)->withQueryString();
 
         // Summary metrics
-        $totalSupervisedInterns = InternProfile::where('supervisor_id', $supervisorId)->where('status', 'active')->count();
-        $approvedReportsCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'approved')->count();
-        $pendingReportsCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'pending')->count();
-        $revisionReportsCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'revision')->count();
+        $totalSupervisedInterns = InternProfile::whereIn('supervisor_id', $supervisorIds)->where('status', 'active')->count();
+        $approvedReportsCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'approved')->count();
+        $pendingReportsCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'pending')->count();
+        $revisionReportsCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'revision')->count();
 
         return view('supervisor.interns', compact(
             'interns',
@@ -100,9 +112,9 @@ class SupervisorController extends Controller
     // Monitoring & Approval Queue
     public function activities(Request $request)
     {
-        $supervisorId = Auth::id();
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
         $query = DailyActivity::with(['intern.internProfile.division'])
-            ->where('supervisor_id', $supervisorId);
+            ->whereIn('supervisor_id', $supervisorIds);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -120,19 +132,19 @@ class SupervisorController extends Controller
             $query->whereDate('date', $request->date);
         }
 
-        $activities = $query->latest('date')->paginate(15);
+        $activities = $query->latest('date')->paginate(15)->withQueryString();
 
         // List of supervised interns for filter dropdown
-        $myInterns = User::whereHas('internProfile', function ($q) use ($supervisorId) {
-            $q->where('supervisor_id', $supervisorId);
+        $myInterns = User::whereHas('internProfile', function ($q) use ($supervisorIds) {
+            $q->whereIn('supervisor_id', $supervisorIds);
         })->get();
 
         // Calculate KPI stats
-        $totalActivities = DailyActivity::where('supervisor_id', $supervisorId)->count();
-        $approvedCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'approved')->count();
-        $pendingCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'pending')->count();
-        $revisionCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'revision')->count();
-        $rejectedCount = DailyActivity::where('supervisor_id', $supervisorId)->where('status', 'rejected')->count();
+        $totalActivities = DailyActivity::whereIn('supervisor_id', $supervisorIds)->count();
+        $approvedCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'approved')->count();
+        $pendingCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'pending')->count();
+        $revisionCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'revision')->count();
+        $rejectedCount = DailyActivity::whereIn('supervisor_id', $supervisorIds)->where('status', 'rejected')->count();
 
         $pctApproved = $totalActivities > 0 ? round(($approvedCount / $totalActivities) * 100, 1) : 0;
         $pctPending = $totalActivities > 0 ? round(($pendingCount / $totalActivities) * 100, 1) : 0;
@@ -157,9 +169,9 @@ class SupervisorController extends Controller
     // Approval Workflow Action: Approve, Revision, Reject
     public function approve(Request $request, $id)
     {
-        $supervisorId = Auth::id();
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
         $activity = DailyActivity::where('id', $id)
-            ->where('supervisor_id', $supervisorId)
+            ->whereIn('supervisor_id', $supervisorIds)
             ->firstOrFail();
 
         $request->validate([
@@ -204,11 +216,79 @@ class SupervisorController extends Controller
         return redirect()->back()->with('success', "Aktivitas harian berhasil {$statusText}.");
     }
 
+    // Bulk Approve Logbook
+    public function bulkApprove(Request $request)
+    {
+        $request->validate([
+            'activity_ids' => 'required|array|min:1',
+            'activity_ids.*' => 'integer',
+        ]);
+
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $activities = DailyActivity::whereIn('id', $request->activity_ids)
+            ->whereIn('supervisor_id', $supervisorIds)
+            ->where('status', 'pending')
+            ->get();
+
+        if ($activities->isEmpty()) {
+            return redirect()->back()->with('error', 'Tidak ada logbook berstatus menunggu yang dipilih.');
+        }
+
+        $now = Carbon::now();
+        foreach ($activities as $activity) {
+            $activity->update([
+                'status' => 'approved',
+                'reviewed_at' => $now,
+            ]);
+
+            \App\Models\Notification::create([
+                'user_id' => $activity->intern_id,
+                'title' => 'Logbook Disetujui',
+                'message' => 'Logbook Anda untuk tanggal ' . Carbon::parse($activity->date)->isoFormat('D MMMM YYYY') . ' telah disetujui oleh pembimbing.',
+            ]);
+        }
+
+        return redirect()->back()->with('success', $activities->count() . ' logbook berhasil disetujui sekaligus.');
+    }
+
+    // Update Delegasi Sementara Supervisor
+    public function updateDelegation(Request $request)
+    {
+        $request->validate([
+            'delegate_supervisor_id' => 'nullable|integer|exists:users,id|not_in:' . Auth::id(),
+            'delegation_start_date' => 'nullable|date',
+            'delegation_end_date' => 'nullable|date|after_or_equal:delegation_start_date',
+        ]);
+
+        $profile = \App\Models\SupervisorProfile::firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['division_id' => Auth::user()->supervisorProfile?->division_id]
+        );
+
+        if (!$request->filled('delegate_supervisor_id')) {
+            $profile->update([
+                'delegate_supervisor_id' => null,
+                'delegation_start_date' => null,
+                'delegation_end_date' => null,
+            ]);
+
+            return redirect()->back()->with('success', 'Delegasi sementara berhasil dinonaktifkan.');
+        }
+
+        $profile->update([
+            'delegate_supervisor_id' => $request->delegate_supervisor_id,
+            'delegation_start_date' => $request->delegation_start_date,
+            'delegation_end_date' => $request->delegation_end_date,
+        ]);
+
+        return redirect()->back()->with('success', 'Delegasi persetujuan sementara berhasil disimpan.');
+    }
+
     // Supervisor Statistics View
     public function statistics()
     {
-        $supervisorId = Auth::id();
-        $interns = InternProfile::with(['user.dailyActivities'])->where('supervisor_id', $supervisorId)->get();
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $interns = InternProfile::with(['user.dailyActivities'])->whereIn('supervisor_id', $supervisorIds)->get();
 
         $statsPerIntern = [];
         $totalReportsAll = 0;

@@ -82,4 +82,54 @@ class InternSurveyController extends Controller
             'avgRecommend'
         ));
     }
+
+    public function exportCsv(Request $request)
+    {
+        $query = InternSurvey::with(['intern.internProfile.division', 'intern.internProfile.supervisor']);
+
+        if ($request->filled('division_id')) {
+            $query->whereHas('intern.internProfile', function ($q) use ($request) {
+                $q->where('division_id', $request->division_id);
+            });
+        }
+
+        $surveys = $query->latest()->get();
+        $filename = 'rekap_survei_magang_' . now()->format('Ymd_His') . '.csv';
+
+        return response()->streamDownload(function () use ($surveys) {
+            $handle = fopen('php://output', 'w');
+            fputs($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, [
+                'Nama Peserta',
+                'Email',
+                'Divisi',
+                'Pembimbing',
+                'Kepuasan Program (1-5)',
+                'Penilaian Pembimbing (1-5)',
+                'Fasilitas Kerja (1-5)',
+                'Skor Rekomendasi NPS (1-10)',
+                'Catatan Masukan',
+                'Tanggal Pengisian',
+            ]);
+
+            foreach ($surveys as $s) {
+                fputcsv($handle, [
+                    $s->intern?->name ?? '-',
+                    $s->intern?->email ?? '-',
+                    $s->intern?->internProfile?->division?->name ?? '-',
+                    $s->intern?->internProfile?->supervisor?->name ?? '-',
+                    $s->satisfaction_rating,
+                    $s->supervisor_rating,
+                    $s->facility_rating,
+                    $s->recommend_score,
+                    $s->feedback_notes ?? '-',
+                    $s->created_at?->format('Y-m-d H:i:s') ?? '-',
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
 }

@@ -90,18 +90,44 @@ class LeaveRequestController extends Controller
     }
 
     /**
-     * Display pending leave requests for supervisor.
+     * Cancel a pending leave request by intern.
      */
-    public function supervisorIndex()
+    public function cancel($id)
+    {
+        $leave = LeaveRequest::where('id', $id)
+            ->where('intern_id', Auth::id())
+            ->firstOrFail();
+
+        if ($leave->status !== 'pending') {
+            return redirect()->route('intern.leaves.index')
+                ->with('error', 'Hanya pengajuan izin berstatus menunggu yang dapat dibatalkan.');
+        }
+
+        $leave->delete();
+
+        return redirect()->route('intern.leaves.index')
+            ->with('success', 'Pengajuan izin berhasil dibatalkan.');
+    }
+
+    /**
+     * Display leave requests for supervisor (with status history filter & delegation).
+     */
+    public function supervisorIndex(Request $request)
     {
         Carbon::setLocale('id');
-        $leaves = Auth::user()->supervisedLeaveRequests()
-            ->with('intern.internProfile')
-            ->where('status', 'pending')
-            ->orderBy('start_date', 'asc')
-            ->get();
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $status = $request->input('status', 'pending');
 
-        return view('supervisor.leaves.index', compact('leaves'));
+        $query = LeaveRequest::with('intern.internProfile')
+            ->whereIn('supervisor_id', $supervisorIds);
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $leaves = $query->orderBy('start_date', 'desc')->get();
+
+        return view('supervisor.leaves.index', compact('leaves', 'status'));
     }
 
     /**
@@ -110,11 +136,73 @@ class LeaveRequestController extends Controller
     public function approve(Request $request, $id)
     {
         Carbon::setLocale('id');
-        $leave = Auth::user()->supervisedLeaveRequests()->findOrFail($id);
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $leave = LeaveRequest::where('id', $id)
+            ->whereIn('supervisor_id', $supervisorIds)
+            ->firstOrFail();
 
+        $this->processApproval($leave, $request->supervisor_note);
+
+        return redirect()->route('supervisor.leaves.index')->with('success', 'Pengajuan izin peserta magang berhasil disetujui.');
+    }
+
+    /**
+     * Reject a leave request.
+     */
+    public function reject(Request $request, $id)
+    {
+        Carbon::setLocale('id');
+        $supervisorIds = Auth::user()->accessibleSupervisorIds();
+        $leave = LeaveRequest::where('id', $id)
+            ->whereIn('supervisor_id', $supervisorIds)
+            ->firstOrFail();
+
+        $this->processRejection($leave, $request->supervisor_note);
+
+        return redirect()->route('supervisor.leaves.index')->with('success', 'Pengajuan izin peserta magang berhasil ditolak.');
+    }
+
+    /**
+     * Admin HR view & override for all leave requests across divisions.
+     */
+    public function adminIndex(Request $request)
+    {
+        Carbon::setLocale('id');
+        $status = $request->input('status', 'pending');
+
+        $query = LeaveRequest::with(['intern.internProfile.division', 'supervisor']);
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $leaves = $query->latest()->paginate(15)->withQueryString();
+
+        return view('admin.leaves.index', compact('leaves', 'status'));
+    }
+
+    public function adminApprove(Request $request, $id)
+    {
+        Carbon::setLocale('id');
+        $leave = LeaveRequest::findOrFail($id);
+        $this->processApproval($leave, $request->supervisor_note ?: 'Disetujui oleh Admin HR (Override).');
+
+        return redirect()->route('admin.leaves.index')->with('success', 'Pengajuan izin berhasil disetujui oleh Admin HR.');
+    }
+
+    public function adminReject(Request $request, $id)
+    {
+        Carbon::setLocale('id');
+        $leave = LeaveRequest::findOrFail($id);
+        $this->processRejection($leave, $request->supervisor_note ?: 'Ditolak oleh Admin HR.');
+
+        return redirect()->route('admin.leaves.index')->with('success', 'Pengajuan izin berhasil ditolak oleh Admin HR.');
+    }
+
+    private function processApproval(LeaveRequest $leave, ?string $note): void
+    {
         $leave->update([
             'status' => 'approved',
-            'supervisor_note' => $request->supervisor_note,
+            'supervisor_note' => $note,
         ]);
 
         // Auto-create or update approved DailyActivities for all weekdays in the date range
@@ -144,7 +232,6 @@ class LeaveRequestController extends Controller
             $currentDate->addDay();
         }
 
-        // Notify Intern
         $startDateFormatted = Carbon::parse($leave->start_date)->isoFormat('D MMMM YYYY');
         $endDateFormatted = Carbon::parse($leave->end_date)->isoFormat('D MMMM YYYY');
         $dateRangeStr = ($leave->start_date->format('Y-m-d') === $leave->end_date->format('Y-m-d'))
@@ -154,26 +241,17 @@ class LeaveRequestController extends Controller
         Notification::create([
             'user_id' => $leave->intern_id,
             'title' => 'Pengajuan Izin Disetujui',
-            'message' => 'Pengajuan ' . ($leave->type === 'sakit' ? 'izin sakit' : 'izin mandiri') . ' Anda untuk tanggal ' . $dateRangeStr . ' telah disetujui oleh pembimbing.',
+            'message' => 'Pengajuan ' . ($leave->type === 'sakit' ? 'izin sakit' : 'izin mandiri') . ' Anda untuk tanggal ' . $dateRangeStr . ' telah disetujui.',
         ]);
-
-        return redirect()->route('supervisor.leaves.index')->with('success', 'Pengajuan izin peserta magang berhasil disetujui.');
     }
 
-    /**
-     * Reject a leave request.
-     */
-    public function reject(Request $request, $id)
+    private function processRejection(LeaveRequest $leave, ?string $note): void
     {
-        Carbon::setLocale('id');
-        $leave = Auth::user()->supervisedLeaveRequests()->findOrFail($id);
-
         $leave->update([
             'status' => 'rejected',
-            'supervisor_note' => $request->supervisor_note,
+            'supervisor_note' => $note,
         ]);
 
-        // Notify Intern
         $startDateFormatted = Carbon::parse($leave->start_date)->isoFormat('D MMMM YYYY');
         $endDateFormatted = Carbon::parse($leave->end_date)->isoFormat('D MMMM YYYY');
         $dateRangeStr = ($leave->start_date->format('Y-m-d') === $leave->end_date->format('Y-m-d'))
@@ -183,9 +261,7 @@ class LeaveRequestController extends Controller
         Notification::create([
             'user_id' => $leave->intern_id,
             'title' => 'Pengajuan Izin Ditolak',
-            'message' => 'Pengajuan ' . ($leave->type === 'sakit' ? 'izin sakit' : 'izin mandiri') . ' Anda untuk tanggal ' . $dateRangeStr . ' ditolak oleh pembimbing. Catatan: ' . ($request->supervisor_note ?? '-'),
+            'message' => 'Pengajuan ' . ($leave->type === 'sakit' ? 'izin sakit' : 'izin mandiri') . ' Anda untuk tanggal ' . $dateRangeStr . ' ditolak. Catatan: ' . ($note ?? '-'),
         ]);
-
-        return redirect()->route('supervisor.leaves.index')->with('success', 'Pengajuan izin peserta magang berhasil ditolak.');
     }
 }

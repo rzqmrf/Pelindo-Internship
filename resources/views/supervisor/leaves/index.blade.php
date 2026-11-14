@@ -24,9 +24,14 @@
         <x-slot name="subtitle">Daftar pengajuan izin sakit yang memerlukan keputusan Anda.</x-slot>
         <x-slot name="icon">fa-regular fa-clock text-amber-500</x-slot>
         <x-slot name="headerAction">
-            <span class="px-3 py-1 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-xs font-extrabold">
-                {{ count($leaves) }} Tertunda
-            </span>
+            <div class="flex flex-wrap items-center gap-2">
+                @foreach(['pending' => 'Tertunda', 'approved' => 'Disetujui', 'rejected' => 'Ditolak', 'all' => 'Semua'] as $key => $label)
+                    <a href="{{ route('supervisor.leaves.index', ['status' => $key]) }}"
+                        class="px-3 py-1 rounded-full text-xs font-extrabold border transition {{ ($status ?? 'pending') === $key ? 'bg-[#005B9C] text-white border-[#005B9C]' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50' }}">
+                        {{ $label }}
+                    </a>
+                @endforeach
+            </div>
         </x-slot>
 
         <div class="space-y-4">

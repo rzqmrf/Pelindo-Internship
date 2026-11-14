@@ -246,4 +246,81 @@ class InternActivityController extends Controller
 
         return redirect()->route('intern.activities.index')->with('success', $message);
     }
+
+    // Hapus Draft Aktivitas Harian
+    public function destroy($id)
+    {
+        $activity = DailyActivity::where('id', $id)
+            ->where('intern_id', Auth::id())
+            ->firstOrFail();
+
+        if ($activity->status !== 'draft') {
+            return redirect()->route('intern.activities.index')
+                ->with('error', 'Hanya logbook berstatus draft yang dapat dihapus.');
+        }
+
+        if ($activity->attachment_path) {
+            Storage::disk('public')->delete($activity->attachment_path);
+        }
+
+        $activity->delete();
+
+        return redirect()->route('intern.activities.index')
+            ->with('success', 'Draft logbook berhasil dihapus.');
+    }
+
+    // Daftar Tugas & Milestone Magang
+    public function tasks()
+    {
+        $userId = Auth::id();
+        $tasks = \App\Models\InternTask::with('assignedBy')
+            ->where('intern_id', $userId)
+            ->latest()
+            ->get();
+
+        $mentoringNotes = \App\Models\MentoringNote::with('mentor')
+            ->where('intern_id', $userId)
+            ->latest('session_date')
+            ->get();
+
+        return view('intern.tasks.index', compact('tasks', 'mentoringNotes'));
+    }
+
+    // Submit / Update Progres Tugas
+    public function submitTask(Request $request, $id)
+    {
+        $task = \App\Models\InternTask::where('id', $id)
+            ->where('intern_id', Auth::id())
+            ->firstOrFail();
+
+        $request->validate([
+            'status' => 'required|in:in_progress,submitted',
+            'submission_note' => 'nullable|string|max:2000',
+            'submission_file' => 'nullable|file|mimes:pdf,doc,docx,zip,jpg,jpeg,png|max:5120',
+        ]);
+
+        $filePath = $task->submission_file;
+        if ($request->hasFile('submission_file')) {
+            if ($filePath) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $filePath = $request->file('submission_file')->store('task_submissions', 'public');
+        }
+
+        $task->update([
+            'status' => $request->status,
+            'submission_note' => $request->submission_note ?? $task->submission_note,
+            'submission_file' => $filePath,
+        ]);
+
+        if ($request->status === 'submitted' && $task->assigned_by) {
+            \App\Models\Notification::create([
+                'user_id' => $task->assigned_by,
+                'title' => 'Pengumpulan Tugas Magang',
+                'message' => Auth::user()->name . " telah mengumpulkan tugas \"{$task->title}\".",
+            ]);
+        }
+
+        return back()->with('success', 'Progres tugas berhasil diperbarui.');
+    }
 }

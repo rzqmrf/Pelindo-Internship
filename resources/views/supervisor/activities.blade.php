@@ -154,10 +154,20 @@
 
     <!-- Activities Review Table Card -->
     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="px-5 py-3.5 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500">Centang logbook berstatus menunggu untuk persetujuan massal</span>
+            <form id="bulk-approve-form" action="{{ route('supervisor.activities.bulk_approve') }}" method="POST">
+                @csrf
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition shadow-2xs">
+                    <i class="fa-solid fa-check-double mr-1"></i> Setujui Terpilih (Bulk)
+                </button>
+            </form>
+        </div>
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50/50 border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                        <th class="py-3.5 px-4 w-10">Pilih</th>
                         <th class="py-3.5 px-5">Tanggal</th>
                         <th class="py-3.5 px-4">Peserta Magang</th>
                         <th class="py-3.5 px-4">Lokasi</th>
@@ -200,6 +210,11 @@
                     }
                     @endphp
                     <tr class="hover:bg-slate-50/50 transition">
+                        <td class="py-3.5 px-4">
+                            @if($act->status === 'pending')
+                                <input type="checkbox" name="activity_ids[]" value="{{ $act->id }}" form="bulk-approve-form" class="w-4 h-4 rounded border-slate-300 text-[#005B9C]">
+                            @endif
+                        </td>
                         <!-- Column 1: Tanggal -->
                         <td class="py-3.5 px-5 whitespace-nowrap">
                             <p class="text-base font-black text-slate-800 leading-none">{{ $act->date->format('d') }}</p>
